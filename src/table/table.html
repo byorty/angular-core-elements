@@ -1,0 +1,29 @@
+<table class="table">
+    <colgroup ng-transclude></colgroup>
+    <thead>
+        <tr>
+            <th class="text-center {{cell.class}}" ng-repeat="cell in cells">{{cell.name}}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="(i, row) in rows" class="table-row {{i}}">
+            <td class="table-cell {{j}} {{cell.class}}"
+                ng-repeat="(j, cell) in cells"
+                core-cell></td>
+        </tr>
+        <tr ng-if="!rows.length">
+            <td class="items-not-found" colspan="{{cells.length}}">{{itemsNotFound}}</td>
+        </tr>
+    </tbody>
+    <tfoot ng-if="pages.length > 1 && rows.length">
+        <tr>
+            <td colspan="{{cells.length}}" class="table-pagination">
+                <ul class="pagination">
+                    <li ng-repeat="page in pages" ng-class="{active: page == currentPage}">
+                        <a href="#" ng-click="$event.preventDefault();selectPage(page)">{{page}}</a>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+    </tfoot>
+</table>

@@ -1,0 +1,38 @@
+<div class="datepicker {{picker.getType()}}">
+    <label ng-if="label" class="{{lblClass}}">{{label}}</label>
+    <div class="datepicker-group">
+        <input type="text"
+               class="form-control"
+               ng-click="open()"
+               value="{{value}}"/>
+        <div class="datepicker-popover" ng-show="isOpen">
+            <div class="datepicker-btns">
+                <core-button ng-click="picker.prev()"
+                             ng-show="picker.isShowPageButtons()"
+                             icon="{{iconLeft}}"></core-button>
+                <div class="datepicker-header">
+                    <core-button ng-click="selectMonth()">{{picker.getHeaderMonth()}}</core-button>
+                    <core-button ng-click="selectYear()">{{picker.getHeaderYear()}}</core-button>
+                </div>
+                <core-button ng-click="picker.next()"
+                             ng-show="picker.isShowPageButtons()"
+                             icon="{{iconRight}}"></core-button>
+            </div>
+            <table class="datepicker-table">
+                <thead ng-if="headers.length">
+                    <tr>
+                        <th ng-repeat="header in headers">{{header}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="row in rows">
+                        <td ng-repeat="cell in row.cells">
+                            <core-button ng-click="picker.select(cell)"
+                                         ng-class="picker.getItemClasses(cell)">{{cell.name}}</core-button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
