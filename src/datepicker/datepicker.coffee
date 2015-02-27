@@ -1,5 +1,5 @@
 angular
-    .module('ngCoreElementDatepicker')
+    .module('ngCoreElementDatepicker', [])
     .directive('coreDatepicker', ['$location', ($location) ->
         changePicker = (newPicker, scope) ->
             scope.picker = newPicker

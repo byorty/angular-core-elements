@@ -1,5 +1,5 @@
 angular
-    .module('ngCoreElementTable')
+    .module('ngCoreElementTable', [])
     .directive('coreTable', ['$rootScope', '$location', ($rootScope, $location) ->
         scope:
             pageQueryName: '@'

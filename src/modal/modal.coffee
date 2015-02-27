@@ -1,5 +1,5 @@
 angular
-    .module('ngCoreElementModal')
+    .module('ngCoreElementModal', [])
     .directive('coreModal', ['$rootScope', ($rootScope) ->
         scope:
             animation: '@'

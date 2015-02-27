@@ -1,5 +1,5 @@
 angular
-    .module('ngCoreElementForm')
+    .module('ngCoreElementForm', [])
     .directive('coreForm', ['$window', '$service', ($window, $service) ->
         scope:
             service: '@'
@@ -64,6 +64,8 @@ angular
         scope:
             type: '@'
             name: '@'
+            value: '=?'
+#            value: '@'
             label: '@'
             lblClass: '@'
             placeholder: '@'
@@ -99,7 +101,7 @@ angular
     .directive('coreHiddenInput', [ ->
         scope:
             name: '@'
-            value: '@'
+            value: '=?'
         require: '^coreForm'
         restrict: 'E'
         replace: true
@@ -130,5 +132,37 @@ angular
             )
             $scope.$on($ctrl.getReceiveEvent(), ->
                 btn.removeClass('disabled')[0].blur()
+            )
+    ])
+    .directive('coreSelect', [ ->
+        scope:
+            name: '@'
+            label: '@'
+            lblClass: '@'
+            wrpClass: '@'
+            items: '='
+            selected: '=?'
+        require: '^coreForm'
+        restrict: 'E'
+        replace: true
+        templateUrl: '/angular-core-elements/src/form/select.html'
+        link: ($scope, $element, $attrs, $ctrl) ->
+            throw new Error('name should be defined') unless $scope.name?
+            $scope.selectEvent = "#{$scope.name}.dropdown.select"
+
+            $scope.$watch(
+                'selected'
+                (newSelected, oldSelected) -> $scope.$$childHead.select($scope.selected) if newSelected isnt oldSelected
+            )
+
+            $scope.$on(
+                $scope.selectEvent
+                (_, selected) ->
+                    console.log(selected)
+#                    $scope.selected = selected
+            )
+
+            $scope.$on($ctrl.getSendEvent(), (_, params) ->
+                params[$scope.name] = $scope.selected.id
             )
     ])

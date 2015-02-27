@@ -6,7 +6,7 @@
                 data-toggle="dropdown"
                 aria-expanded="false"
                 ng-click="open()">
-            {{selectedItem.name}} <span class="caret"></span>
+            {{selected.name}} <span class="caret"></span>
         </button>
         <ul class="dropdown-menu {{align}}" role="menu">
             <li ng-repeat="item in items">

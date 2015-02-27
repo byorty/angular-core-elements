@@ -1,5 +1,5 @@
 angular
-    .module('ngCoreElementPanel')
+    .module('ngCoreElementPanel', [])
     .directive('corePanel', [ ->
         restrict: 'E'
         replace: true

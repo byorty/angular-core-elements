@@ -1,5 +1,5 @@
 angular
-    .module('ngCoreElementButton')
+    .module('ngCoreElementButton', [])
     .directive('coreButton', [ ->
         scope:
             icon: '@'

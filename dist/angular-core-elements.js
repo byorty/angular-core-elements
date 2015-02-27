@@ -265,7 +265,7 @@ Date.replaceCharsLocale = {
   }
 };
 
-angular.module('ngCoreElementButton').directive('coreButton', [
+angular.module('ngCoreElementButton', []).directive('coreButton', [
   function() {
     return {
       scope: {
@@ -279,7 +279,7 @@ angular.module('ngCoreElementButton').directive('coreButton', [
   }
 ]);
 
-angular.module('ngCoreElementDatepicker').directive('coreDatepicker', [
+angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
   '$location', function($location) {
     var AbstractPicker, DaysPicker, MonthsPicker, YearsPicker, changePicker, pickerByType;
     changePicker = function(newPicker, scope) {
@@ -669,11 +669,12 @@ angular.module('ngCoreElementDatepicker').directive('coreDatepicker', [
   }
 ]);
 
-angular.module('ngCoreElementDropdown').directive('coreDropdown', [
+angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
   '$location', '$rootScope', '$timeout', function($location, $rootScope, $timeout) {
     return {
       scope: {
         items: '=',
+        selected: '=?',
         name: '@',
         queryName: '@',
         label: '@',
@@ -691,12 +692,8 @@ angular.module('ngCoreElementDropdown').directive('coreDropdown', [
       replace: true,
       templateUrl: '/angular-core-elements/src/dropdown/dropdown.html',
       controller: function($scope) {
-        var ANY_VALUE, selectById, selectDefault;
+        var ANY_VALUE, hasItems, selectById, selectDefault, updateItems;
         ANY_VALUE = '__ANY__';
-        if ($scope.items == null) {
-          throw new Error('items should be defined');
-        }
-        $scope.selectedItem = null;
         $scope.isOpen = false;
         if ($scope.changeUrl == null) {
           $scope.changeUrl = false;
@@ -724,24 +721,41 @@ angular.module('ngCoreElementDropdown').directive('coreDropdown', [
         };
         $scope.select = function(item) {
           $scope.isOpen = false;
-          $scope.selectedItem = item;
-          $rootScope.$broadcast($scope.selectEvent, $scope.selectedItem);
+          $scope.selected = item;
+          $rootScope.$broadcast($scope.selectEvent, $scope.selected);
           if ($scope.changeUrl === true && $scope.changeUrlOnStart === true && item.id !== ANY_VALUE) {
-            $location.search($scope.queryName, $scope.selectedItem.id);
+            $location.search($scope.queryName, $scope.selected.id);
           }
           if ($scope.changeUrl === true && $scope.changeUrlOnStart === true && item.id === ANY_VALUE) {
             return $location.search($scope.queryName, null);
           }
         };
+        $scope.$watch('items', function(newItems, oldItems) {
+          if (newItems !== oldItems) {
+            return updateItems();
+          }
+        });
+        $scope.$watch('selected', function(newSelected, oldSelected) {
+          if (newSelected !== oldSelected && $scope.selected) {
+            return $scope.select($scope.selected);
+          }
+        });
+        hasItems = function() {
+          return $scope.items != null;
+        };
         selectDefault = function() {
           var search;
           search = $location.search();
-          if (($scope.queryName != null) && (search[$scope.queryName] != null)) {
+          if ($scope.selected != null) {
+            $scope.select($scope.selected);
+          } else if (($scope.queryName != null) && (search[$scope.queryName] != null)) {
             selectById(parseInt(search[$scope.queryName]));
           } else {
             $scope.select($scope.items[0]);
           }
-          return $scope.changeUrlOnStart = true;
+          if (hasItems()) {
+            return $scope.changeUrlOnStart = true;
+          }
         };
         selectById = function(id) {
           var i, item, ref, results;
@@ -757,23 +771,28 @@ angular.module('ngCoreElementDropdown').directive('coreDropdown', [
           }
           return results;
         };
-        if ($scope.hasAny) {
-          return $timeout(function() {
-            $scope.items.unshift({
-              id: ANY_VALUE,
-              name: $scope.anyName
+        updateItems = function() {
+          if ($scope.hasAny) {
+            return $timeout(function() {
+              $scope.items.unshift({
+                id: ANY_VALUE,
+                name: $scope.anyName
+              });
+              return selectDefault();
             });
+          } else {
             return selectDefault();
-          });
-        } else {
-          return selectDefault();
+          }
+        };
+        if (hasItems()) {
+          return updateItems();
         }
       }
     };
   }
 ]);
 
-angular.module('ngCoreElementForm').directive('coreForm', [
+angular.module('ngCoreElementForm', []).directive('coreForm', [
   '$window', '$service', function($window, $service) {
     return {
       scope: {
@@ -884,6 +903,7 @@ angular.module('ngCoreElementForm').directive('coreForm', [
       scope: {
         type: '@',
         name: '@',
+        value: '=?',
         label: '@',
         lblClass: '@',
         placeholder: '@',
@@ -938,7 +958,7 @@ angular.module('ngCoreElementForm').directive('coreForm', [
     return {
       scope: {
         name: '@',
-        value: '@'
+        value: '=?'
       },
       require: '^coreForm',
       restrict: 'E',
@@ -987,9 +1007,44 @@ angular.module('ngCoreElementForm').directive('coreForm', [
       }
     };
   }
+]).directive('coreSelect', [
+  function() {
+    return {
+      scope: {
+        name: '@',
+        label: '@',
+        lblClass: '@',
+        wrpClass: '@',
+        items: '=',
+        selected: '=?'
+      },
+      require: '^coreForm',
+      restrict: 'E',
+      replace: true,
+      templateUrl: '/angular-core-elements/src/form/select.html',
+      link: function($scope, $element, $attrs, $ctrl) {
+        if ($scope.name == null) {
+          throw new Error('name should be defined');
+        }
+        $scope.selectEvent = $scope.name + ".dropdown.select";
+        $scope.$watch('selected', function(newSelected, oldSelected) {
+          if (newSelected !== oldSelected) {
+            return $scope.$$childHead.select($scope.selected);
+          }
+        });
+        $scope.$on($scope.selectEvent, function(_, selected) {
+          console.log(arguments);
+          return $scope.selected = selected;
+        });
+        return $scope.$on($ctrl.getSendEvent(), function(_, params) {
+          return params[$scope.name] = $scope.selected.id;
+        });
+      }
+    };
+  }
 ]);
 
-angular.module('ngCoreElementModal').directive('coreModal', [
+angular.module('ngCoreElementModal', []).directive('coreModal', [
   '$rootScope', function($rootScope) {
     return {
       scope: {
@@ -1032,7 +1087,7 @@ angular.module('ngCoreElementModal').directive('coreModal', [
   }
 ]);
 
-angular.module('ngCoreElementTable').directive('coreTable', [
+angular.module('ngCoreElementTable', []).directive('coreTable', [
   '$rootScope', '$location', function($rootScope, $location) {
     return {
       scope: {
