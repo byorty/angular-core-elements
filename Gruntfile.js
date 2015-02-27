@@ -28,16 +28,16 @@ module.exports = function (grunt) {
                     prefix: '/angular-core-elements'
                 },
                 src: 'src/**/*.html',
-                dest: 'dist/template.js'
+                dest: 'dist/angular-core-elements-tpls.js'
             }
         },
         concat: {
             dist: {
                 src: [
                     'dist/angular-core-elements.js',
-                    'dist/template.js',
+                    'dist/angular-core-elements-tpls.js',
                 ],
-                dest: 'dist/angular-core-elements.js'
+                dest: 'dist/angular-core-elements.all.js'
             }
         },
         wrap: {
@@ -74,10 +74,11 @@ module.exports = function (grunt) {
                 }
             },
             dist: {
-                files: [{
-                    expand: true,
-                    src: 'dist/*.js'
-                }]
+                files: {
+                    'dist/angular-core-elements.min.js': 'dist/angular-core-elements.js',
+                    'dist/angular-core-elements-tpls.min.js': 'dist/angular-core-elements-tpls.js',
+                    'dist/angular-core-elements.all.min.js': 'dist/angular-core-elements.all.js'
+                }
             }
         },
         less: {
@@ -95,7 +96,6 @@ module.exports = function (grunt) {
             dist: {
                 src: [
                     'dist/angular-core-elements.src.coffee',
-                    'dist/template.js',
                 ]
             }
         }
