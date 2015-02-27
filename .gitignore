@@ -1,2 +1,4 @@
 src/**/*.js
 src/**/*.js.map
+node_modules
+src/less/bootstrap

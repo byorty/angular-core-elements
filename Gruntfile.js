@@ -1,61 +1,52 @@
 'use strict';
 
 module.exports = function (grunt) {
-
-    // Project configuration.
     grunt.initConfig({
-        // Metadata.
         pkg: grunt.file.readJSON('package.json'),
-        // Task configuration.
-        ngtemplates: {
-            sale: {
+        coffee: {
+            dist: {
                 options: {
-                    prefix: '/'
+                    bare: true,
+                    join: true
                 },
-                cwd: 'www/',
-                src: 'static/tpls/**/*.html',
-                dest: 'www/static/dist/template.js'
+                files: {
+                    'dist/angular-core-elements.js': [
+                        'src/module.coffee',
+                        'src/button/button.coffee',
+                        'src/datepicker/datepicker.coffee',
+                        'src/dropdown/dropdown.coffee',
+                        'src/form/form.coffee',
+                        'src/modal/modal.coffee',
+                        'src/table/table.coffee',
+                    ]
+                }
+            }
+        },
+        ngtemplates: {
+            ngCoreElements: {
+                options: {
+                    prefix: '/angular-core-elements'
+                },
+                src: 'src/**/*.html',
+                dest: 'dist/template.js'
             }
         },
         concat: {
-            libs: {
+            dist: {
                 src: [
-                    'www/static/js/libs/FileAPI.min.js',
-                    'www/static/js/libs/angular-file-upload-shim.js',
-                    'www/static/js/libs/angular-file-upload-html5-shim.js',
-                    'www/static/js/libs/ZeroClipboard.js',
-                    'www/static/js/libs/angular.js',
-                    'www/static/js/libs/angular-sanitize.js',
-                    'www/static/js/libs/angular-resource.js',
-                    'www/static/js/libs/angular-route.js',
-                    'www/static/js/libs/angular-loading-bar.js',
-                    'www/static/js/libs/angular-clip.js',
-                    'www/static/js/libs/angular-animate.js',
-                    'www/static/js/libs/angular-file-upload.js',
+                    'dist/angular-core-elements.js',
+                    'dist/template.js',
                 ],
-                dest: 'www/static/dist/libs.js'
-            },
-            app: {
-                src: [
-                    'www/static/js/libs/angular-detector.js',
-                    'www/static/js/libs/angular-mask.js',
-                    'www/static/js/libs/angular-scroll.js',
-                    'www/static/js/libs/angular-strap.js',
-                    'www/static/js/libs/angular-strap.tpl.js',
-                    'www/static/js/libs/hamster.js',
-                    'www/static/js/*.js',
-                    'www/static/js/user/*.js',
-                    'www/static/dist/template.js'
-                ],
-                dest: 'www/static/dist/app.js'
-            },
-            admin: {
-                src: [
-                    'www/static/js/libs/angular-locale_ru-ru.js',
-                    'www/static/js/*.js',
-                    'www/static/js/admin/*.js',
-                ],
-                dest: 'www/static/dist/admin.js'
+                dest: 'dist/angular-core-elements.js'
+            }
+        },
+        wrap: {
+            dist: {
+                src: ['dist/*.js'],
+                dest: '.',
+                options: {
+                    wrapper: ['(function(angular) {', '})(window.angular);']
+                }
             }
         },
         uglify: {
@@ -85,7 +76,7 @@ module.exports = function (grunt) {
             dist: {
                 files: [{
                     expand: true,
-                    src: 'www/static/dist/**/*.js'
+                    src: 'dist/*.js'
                 }]
             }
         },
@@ -96,67 +87,38 @@ module.exports = function (grunt) {
                     cleancss: true
                 },
                 files: {
-                    'www/static/dist/main.css': 'www/static/css/main.less',
-                    'www/static/dist/mobile.css': 'www/static/css/mobile.less',
-                    'www/static/dist/admin.css': 'www/static/css/admin.less',
-                    'www/static/dist/home.css': 'www/static/css/home.less',
-                    'www/static/dist/mobile-home.css': 'www/static/css/mobile-home.less',
-                    'www/static/dist/bonus.css': 'www/static/css/bonus.less',
-                    'www/static/dist/mobile-bonus.css': 'www/static/css/mobile-bonus.less'
+                    'dist/angular-core-elements.css': 'src/less/common.less'
                 }
-            }
-        },
-        copy: {
-            dist: {
-                src: [
-                    'www/static/js/libs/ZeroClipboard.swf',
-                    'www/static/js/libs/FileAPI.flash.swf'
-                ],
-                dest: 'www/static/dist/',
-                expand: true,
-                flatten: true
             }
         },
         clean: {
             dist: {
                 src: [
-                    'www/static/dist/template.js',
+                    'dist/angular-core-elements.src.coffee',
+                    'dist/template.js',
                 ]
-            }
-        },
-        md2html: {
-            api: {
-                options: {
-                    layout: 'misc/md/base.html'
-                },
-                files: [{
-                    src: ['misc/md/api.md'],
-                    dest: 'www/api.html'
-                }]
             }
         }
     });
 
-    // These plugins provide necessary tasks.
+    grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-angular-templates');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-wrap');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-md2html');
 
-    // Default task.
     grunt.registerTask(
         'default',
         [
+            'coffee',
             'ngtemplates',
             'concat',
+            'wrap',
             'uglify',
             'less',
-            'copy',
             'clean',
-            'md2html'
         ]
     );
 

@@ -1,0 +1,65 @@
+.box-sizing(@arg) {
+    -webkit-box-sizing: @arg;
+    -moz-box-sizing: @arg;
+    box-sizing: @arg;
+}
+
+.opacity(@opacity: 0.5) {
+    -moz-opacity: @opacity;
+    -khtml-opacity: @opacity;
+    -webkit-opacity: @opacity;
+    opacity: @opacity;
+    @opperc: @opacity * 100;
+    -ms-filter: ~"progid:DXImageTransform.Microsoft.Alpha(opacity=@{opperc})";
+    filter: ~"alpha(opacity=@{opperc})";
+}
+
+.border-radius (@radius) {
+    -webkit-border-radius: @radius;
+    -moz-border-radius: @radius;
+    border-radius: @radius;
+}
+
+.display-inline (@verticalAlign: top) {
+    display: -moz-inline-stack !important;
+    display: inline-block !important;
+    vertical-align: @verticalAlign;
+    zoom: 1;
+    *display: inline;
+}
+
+.transform(@args) {
+    -webkit-transform: @args;
+    -moz-transform: @args;
+    -ms-transform: @args;
+    -o-transform: @args;
+    transform: @args;
+}
+
+.transition(@args) {
+    -webkit-transition: @args;
+    -moz-transition: @args;
+    -ms-transition: @args;
+    -o-transition: @args;
+    transition: @args;
+}
+
+.cell-width(@width) {
+    min-width: @width;
+    max-width: @width;
+    width: @width;
+}
+
+.clear-shadow() {
+    .box-shadow(none);
+}
+
+.box-shadow(@arguments) {
+    -webkit-box-shadow: @arguments;
+    -moz-box-shadow: @arguments;
+    box-shadow: @arguments;
+}
+
+.to-lowercase() {
+    text-transform: lowercase;
+}
