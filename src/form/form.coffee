@@ -149,20 +149,20 @@ angular
         link: ($scope, $element, $attrs, $ctrl) ->
             throw new Error('name should be defined') unless $scope.name?
             $scope.selectEvent = "#{$scope.name}.dropdown.select"
+            value = 0
 
             $scope.$watch(
                 'selected'
-                (newSelected, oldSelected) -> $scope.$$childHead.select($scope.selected) if newSelected isnt oldSelected
+                (newSelected, oldSelected) ->
+                    $scope.$$childHead.select($scope.selected) if newSelected isnt oldSelected
             )
 
             $scope.$on(
                 $scope.selectEvent
-                (_, selected) ->
-                    console.log(selected)
-#                    $scope.selected = selected
+                (_, selected) -> value = selected?.id
             )
 
             $scope.$on($ctrl.getSendEvent(), (_, params) ->
-                params[$scope.name] = $scope.selected.id
+                params[$scope.name] = value
             )
     ])

@@ -1,0 +1,9 @@
+<div class="details form-horizontal">
+    <div class="details-hidden" ng-transclude></div>
+    <div class="form-group" ng-repeat="row in rows">
+        <label class="col-sm-2 control-label">{{row.name}}</label>
+        <div class="col-sm-8">
+            <p class="form-control-static" core-compile-row></p>
+        </div>
+    </div>
+</div>

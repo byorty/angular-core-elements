@@ -190,6 +190,19 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
   );
 
 
+  $templateCache.put('/angular-core-elements/src/table/details.html',
+    "<div class=\"details form-horizontal\">\n" +
+    "    <div class=\"details-hidden\" ng-transclude></div>\n" +
+    "    <div class=\"form-group\" ng-repeat=\"row in rows\">\n" +
+    "        <label class=\"col-sm-2 control-label\">{{row.name}}</label>\n" +
+    "        <div class=\"col-sm-8\">\n" +
+    "            <p class=\"form-control-static\" core-compile-row></p>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>"
+  );
+
+
   $templateCache.put('/angular-core-elements/src/table/table.html',
     "<table class=\"table\">\n" +
     "    <colgroup ng-transclude></colgroup>\n" +

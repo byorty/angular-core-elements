@@ -28,7 +28,7 @@ angular
             $scope.changeUrl = false unless $scope.changeUrl?
             $scope.changeUrlOnStart = false unless $scope.changeUrl?
             $scope.itemsNotFound = 'Нет данных для отображения' unless $scope.itemsNotFound?
-            parentScope = null
+            parentScope = $scope
 
             $scope.$on('pagination', (event, pagination) ->
                 $scope.itemsPerPage = pagination.itemsPerPage
@@ -62,7 +62,6 @@ angular
             @getCollectionName = -> $attrs.items
             @getParentScope = -> parentScope
 
-            parentScope = $scope
             while parentScope isnt null and !parentScope.hasOwnProperty(@getCollectionName())
                 parentScope = parentScope.$parent
 
@@ -83,12 +82,54 @@ angular
             $scope.content = $element.html();
             $ctrl.add($scope)
     ])
-    .directive('coreCell', ['$compile', ($compile) ->
+    .directive('coreCell', ['compileCell', (compileCell) ->
         restrict: 'A'
         require: '^coreTable'
         replace: true
         link: ($scope, $element, $attrs, $ctrl) ->
-            reg = new RegExp('item', 'g')
-            $element.append($scope.cell.content.replace(reg, "#{$ctrl.getCollectionName()}[#{$scope.$parent.i}]"))
-            $compile($element.contents())($ctrl.getParentScope())
+            compileCell($element, $scope.cell.content, "#{$ctrl.getCollectionName()}[#{$scope.$parent.i}]", $ctrl.getParentScope())
     ])
+    .directive('coreDetails', [ ->
+        scope:
+            item: '='
+        restrict: 'E'
+        replace: true
+        transclude: true
+        templateUrl: '/angular-core-elements/src/table/details.html'
+        controller: ($scope, $element, $attrs) ->
+            $scope.rows = []
+            parentScope = $scope
+
+            @add = (row) -> $scope.rows.push(row)
+            @getCollectionName = -> $attrs.item
+            @getParentScope = -> parentScope
+
+            while parentScope isnt null and !parentScope.hasOwnProperty(@getCollectionName())
+                parentScope = parentScope.$parent
+    ])
+    .directive('coreRow', [ ->
+        scope:
+            name: '@'
+            class: '@'
+        restrict: 'E'
+        require: '^coreDetails'
+        link: ($scope, $element, $attrs, $ctrl) ->
+            $scope.content = $element.html();
+            $ctrl.add($scope)
+    ])
+    .directive('coreCompileRow', ['compileCell', (compileCell) ->
+        restrict: 'A'
+        require: '^coreDetails'
+        link: ($scope, $element, $attrs, $ctrl) ->
+            console.log($element, $scope.row.content, $ctrl.getCollectionName(), $ctrl.getParentScope())
+            compileCell($element, $scope.row.content, $ctrl.getCollectionName(), $ctrl.getParentScope())
+])
+    .factory(
+        'compileCell'
+        ['$compile', ($compile) ->
+            (element, content, replaced, parentScope) ->
+                reg = new RegExp('item', 'g')
+                element.append(content.replace(reg, replaced))
+                $compile(element.contents())(parentScope)
+        ]
+    )

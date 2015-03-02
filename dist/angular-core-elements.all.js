@@ -1023,21 +1023,22 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       replace: true,
       templateUrl: '/angular-core-elements/src/form/select.html',
       link: function($scope, $element, $attrs, $ctrl) {
+        var value;
         if ($scope.name == null) {
           throw new Error('name should be defined');
         }
         $scope.selectEvent = $scope.name + ".dropdown.select";
+        value = 0;
         $scope.$watch('selected', function(newSelected, oldSelected) {
           if (newSelected !== oldSelected) {
             return $scope.$$childHead.select($scope.selected);
           }
         });
         $scope.$on($scope.selectEvent, function(_, selected) {
-          console.log(arguments);
-          return $scope.selected = selected;
+          return value = selected != null ? selected.id : void 0;
         });
         return $scope.$on($ctrl.getSendEvent(), function(_, params) {
-          return params[$scope.name] = $scope.selected.id;
+          return params[$scope.name] = value;
         });
       }
     };
@@ -1137,7 +1138,7 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
         if ($scope.itemsNotFound == null) {
           $scope.itemsNotFound = 'Нет данных для отображения';
         }
-        parentScope = null;
+        parentScope = $scope;
         $scope.$on('pagination', function(event, pagination) {
           $scope.itemsPerPage = pagination.itemsPerPage;
           $scope.itemsCount = pagination.itemsCount;
@@ -1179,7 +1180,6 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
         this.getParentScope = function() {
           return parentScope;
         };
-        parentScope = $scope;
         while (parentScope !== null && !parentScope.hasOwnProperty(this.getCollectionName())) {
           parentScope = parentScope.$parent;
         }
@@ -1210,17 +1210,80 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
     };
   }
 ]).directive('coreCell', [
-  '$compile', function($compile) {
+  'compileCell', function(compileCell) {
     return {
       restrict: 'A',
       require: '^coreTable',
       replace: true,
       link: function($scope, $element, $attrs, $ctrl) {
-        var reg;
-        reg = new RegExp('item', 'g');
-        $element.append($scope.cell.content.replace(reg, ($ctrl.getCollectionName()) + "[" + $scope.$parent.i + "]"));
-        return $compile($element.contents())($ctrl.getParentScope());
+        return compileCell($element, $scope.cell.content, ($ctrl.getCollectionName()) + "[" + $scope.$parent.i + "]", $ctrl.getParentScope());
       }
+    };
+  }
+]).directive('coreDetails', [
+  function() {
+    return {
+      scope: {
+        item: '='
+      },
+      restrict: 'E',
+      replace: true,
+      transclude: true,
+      templateUrl: '/angular-core-elements/src/table/details.html',
+      controller: function($scope, $element, $attrs) {
+        var parentScope, results;
+        $scope.rows = [];
+        parentScope = $scope;
+        this.add = function(row) {
+          return $scope.rows.push(row);
+        };
+        this.getCollectionName = function() {
+          return $attrs.item;
+        };
+        this.getParentScope = function() {
+          return parentScope;
+        };
+        results = [];
+        while (parentScope !== null && !parentScope.hasOwnProperty(this.getCollectionName())) {
+          results.push(parentScope = parentScope.$parent);
+        }
+        return results;
+      }
+    };
+  }
+]).directive('coreRow', [
+  function() {
+    return {
+      scope: {
+        name: '@',
+        "class": '@'
+      },
+      restrict: 'E',
+      require: '^coreDetails',
+      link: function($scope, $element, $attrs, $ctrl) {
+        $scope.content = $element.html();
+        return $ctrl.add($scope);
+      }
+    };
+  }
+]).directive('coreCompileRow', [
+  'compileCell', function(compileCell) {
+    return {
+      restrict: 'A',
+      require: '^coreDetails',
+      link: function($scope, $element, $attrs, $ctrl) {
+        console.log($element, $scope.row.content, $ctrl.getCollectionName(), $ctrl.getParentScope());
+        return compileCell($element, $scope.row.content, $ctrl.getCollectionName(), $ctrl.getParentScope());
+      }
+    };
+  }
+]).factory('compileCell', [
+  '$compile', function($compile) {
+    return function(element, content, replaced, parentScope) {
+      var reg;
+      reg = new RegExp('item', 'g');
+      element.append(content.replace(reg, replaced));
+      return $compile(element.contents())(parentScope);
     };
   }
 ]);
@@ -1413,6 +1476,19 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
 
   $templateCache.put('/angular-core-elements/src/panel/panel.html',
     "<div class=\"panel panel-default\" ng-transclude></div>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/table/details.html',
+    "<div class=\"details form-horizontal\">\n" +
+    "    <div class=\"details-hidden\" ng-transclude></div>\n" +
+    "    <div class=\"form-group\" ng-repeat=\"row in rows\">\n" +
+    "        <label class=\"col-sm-2 control-label\">{{row.name}}</label>\n" +
+    "        <div class=\"col-sm-8\">\n" +
+    "            <p class=\"form-control-static\" core-compile-row></p>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>"
   );
 
 
