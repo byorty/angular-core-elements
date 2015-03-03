@@ -6,16 +6,16 @@
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="(i, row) in rows" class="table-row {{i}}">
+        <tr ng-repeat="(i, item) in items" class="table-row {{i}}">
             <td class="table-cell {{j}} {{cell.class}}"
                 ng-repeat="(j, cell) in cells"
                 core-cell></td>
         </tr>
-        <tr ng-if="!rows.length">
+        <tr ng-show="!items.length">
             <td class="items-not-found" colspan="{{cells.length}}">{{itemsNotFound}}</td>
         </tr>
     </tbody>
-    <tfoot ng-if="pages.length > 1 && rows.length">
+    <tfoot ng-show="pages.length > 1 && items.length">
         <tr>
             <td colspan="{{cells.length}}" class="table-pagination">
                 <ul class="pagination">

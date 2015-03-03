@@ -65,7 +65,6 @@ angular
             type: '@'
             name: '@'
             value: '=?'
-#            value: '@'
             label: '@'
             lblClass: '@'
             placeholder: '@'
@@ -73,7 +72,10 @@ angular
         require: '^coreForm'
         restrict: 'E'
         replace: true
-        templateUrl: (_, $attrs) -> if $attrs.wrpClass and $attrs.wrpClass.length > 0 then '/angular-core-elements/src/form/wrapped-input.html' else '/angular-core-elements/src/form/input.html'
+        templateUrl: ($element, $attrs) ->
+            if $element.parent().hasClass('form-horizontal')
+                '/angular-core-elements/src/form/wrapped-input.html'
+            else '/angular-core-elements/src/form/input.html'
         link: ($scope, $element, $attrs, $ctrl) ->
             $scope.type = 'text' unless $scope.type?
             input = angular.element($element[0].querySelector('input'))
@@ -121,7 +123,10 @@ angular
         restrict: 'E'
         replace: true
         transclude: true
-        templateUrl: (_, $attrs) -> if $attrs.wrpClass and $attrs.wrpClass.length > 0 then '/angular-core-elements/src/form/wrapped-submit.html' else '/angular-core-elements/src/form/submit.html'
+        templateUrl: ($element, $attrs) ->
+            if $element.parent().hasClass('form-horizontal')
+                '/angular-core-elements/src/form/wrapped-submit.html'
+            else '/angular-core-elements/src/form/submit.html'
         link: ($scope, $element, $attrs, $ctrl) ->
             $scope.btnClass = 'btn-success' unless $scope.btnClass?
 
@@ -142,10 +147,14 @@ angular
             wrpClass: '@'
             items: '='
             selected: '=?'
+            selectedId: '=?'
         require: '^coreForm'
         restrict: 'E'
         replace: true
-        templateUrl: '/angular-core-elements/src/form/select.html'
+        templateUrl: ($element, $attrs) ->
+            if $element.parent().hasClass('form-horizontal')
+                '/angular-core-elements/src/form/wrapped-select.html'
+            else '/angular-core-elements/src/form/select.html'
         link: ($scope, $element, $attrs, $ctrl) ->
             throw new Error('name should be defined') unless $scope.name?
             $scope.selectEvent = "#{$scope.name}.dropdown.select"
@@ -157,6 +166,12 @@ angular
                     $scope.$$childHead.select($scope.selected) if newSelected isnt oldSelected
             )
 
+            $scope.$watch(
+                'selectedId'
+                (newSelected, oldSelected) ->
+                    $scope.$$childHead.selectById($scope.selectedId) if newSelected isnt oldSelected
+            )
+
             $scope.$on(
                 $scope.selectEvent
                 (_, selected) -> value = selected?.id
@@ -164,5 +179,38 @@ angular
 
             $scope.$on($ctrl.getSendEvent(), (_, params) ->
                 params[$scope.name] = value
+            )
+    ])
+    .directive('coreTextarea', [ ->
+        scope:
+            name: '@'
+            value: '=?'
+            label: '@'
+            lblClass: '@'
+            placeholder: '@'
+            wrpClass: '@'
+            rows: '=?'
+            cols: '=?'
+        require: '^coreForm'
+        restrict: 'E'
+        replace: true
+        templateUrl: ($element, $attrs) ->
+            if $element.parent().hasClass('form-horizontal')
+                '/angular-core-elements/src/form/wrapped-textarea.html'
+            else '/angular-core-elements/src/form/textarea.html'
+        link: ($scope, $element, $attrs, $ctrl) ->
+            textarea = angular.element($element[0].querySelector('textarea'))
+            parent = textarea.parent()
+
+            $scope.$on($ctrl.getSendEvent(), (_, params) ->
+                params[textarea.attr('name')] = textarea.val()
+            )
+
+            $scope.$on($ctrl.getErrorEvent(), (_, resp) ->
+                parent.addClass('has-error') if resp.messages[$scope.name]
+            )
+
+            $scope.$on($ctrl.getCleanAfterSendEvent(), ->
+                textarea.val('')
             )
     ])

@@ -3,7 +3,7 @@ angular
     .directive('coreTable', ['$rootScope', '$location', ($rootScope, $location) ->
         scope:
             pageQueryName: '@'
-            rows: '=items'
+            items: '=?'
             itemsPerPage: '=?'
             itemsCount: '=?'
             currentPage: '=?'
@@ -71,6 +71,13 @@ angular
 
             $scope.selectPage($scope.currentPage) if $scope.itemsCount and $scope.itemsPerPage
             $scope.changeUrlOnStart = true
+
+            parentScope.$watch(
+                @getCollectionName()
+                (newRows, oldRows, scope) =>
+                    $scope.items = scope[@getCollectionName()] if scope[@getCollectionName()]? and $scope.items isnt scope[@getCollectionName()]
+                true
+            )
     ])
     .directive('coreCol', [ ->
         scope:
@@ -78,9 +85,11 @@ angular
             class: '@'
         restrict: 'E'
         require: '^coreTable'
-        link: ($scope, $element, $attrs, $ctrl) ->
-            $scope.content = $element.html();
-            $ctrl.add($scope)
+        compile: ($element, $attrs) ->
+            content = $element.html()
+            ($scope, $element, $attrs, $ctrl) ->
+                $scope.content = content
+                $ctrl.add($scope)
     ])
     .directive('coreCell', ['compileCell', (compileCell) ->
         restrict: 'A'
@@ -113,22 +122,23 @@ angular
             class: '@'
         restrict: 'E'
         require: '^coreDetails'
-        link: ($scope, $element, $attrs, $ctrl) ->
-            $scope.content = $element.html();
-            $ctrl.add($scope)
+        compile: ($element, $attrs) ->
+            content = $element.html()
+            ($scope, $element, $attrs, $ctrl) ->
+                $scope.content = content
+                $ctrl.add($scope)
     ])
     .directive('coreCompileRow', ['compileCell', (compileCell) ->
         restrict: 'A'
         require: '^coreDetails'
         link: ($scope, $element, $attrs, $ctrl) ->
-            console.log($element, $scope.row.content, $ctrl.getCollectionName(), $ctrl.getParentScope())
             compileCell($element, $scope.row.content, $ctrl.getCollectionName(), $ctrl.getParentScope())
 ])
     .factory(
         'compileCell'
         ['$compile', ($compile) ->
             (element, content, replaced, parentScope) ->
-                reg = new RegExp('item', 'g')
+                reg = new RegExp('item(?!s)', 'g')
                 element.append(content.replace(reg, replaced))
                 $compile(element.contents())(parentScope)
         ]

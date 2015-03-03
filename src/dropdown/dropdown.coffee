@@ -40,6 +40,10 @@ angular
                 $location.search($scope.queryName, $scope.selected.id) if $scope.changeUrl is true and $scope.changeUrlOnStart is true and item.id isnt ANY_VALUE
                 $location.search($scope.queryName, null) if $scope.changeUrl is true and $scope.changeUrlOnStart is true and item.id is ANY_VALUE
 
+            $scope.selectById = (id) ->
+                for i, item of $scope.items
+                    $scope.select(item) if item.id is id
+
             $scope.$watch(
                 'items'
                 (newItems, oldItems) -> updateItems() if newItems isnt oldItems
@@ -57,14 +61,10 @@ angular
                 if $scope.selected?
                     $scope.select($scope.selected)
                 else if $scope.queryName? and search[$scope.queryName]?
-                    selectById(parseInt(search[$scope.queryName]))
+                    $scope.selectById(parseInt(search[$scope.queryName]))
                 else
                     $scope.select($scope.items[0])
                 $scope.changeUrlOnStart = true if hasItems()
-
-            selectById = (id) ->
-                for i, item of $scope.items
-                    $scope.select(item) if item.id is id
 
             updateItems = ->
                 if $scope.hasAny

@@ -912,8 +912,8 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       require: '^coreForm',
       restrict: 'E',
       replace: true,
-      templateUrl: function(_, $attrs) {
-        if ($attrs.wrpClass && $attrs.wrpClass.length > 0) {
+      templateUrl: function($element, $attrs) {
+        if ($element.parent().hasClass('form-horizontal')) {
           return '/angular-core-elements/src/form/wrapped-input.html';
         } else {
           return '/angular-core-elements/src/form/input.html';
@@ -985,8 +985,8 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       restrict: 'E',
       replace: true,
       transclude: true,
-      templateUrl: function(_, $attrs) {
-        if ($attrs.wrpClass && $attrs.wrpClass.length > 0) {
+      templateUrl: function($element, $attrs) {
+        if ($element.parent().hasClass('form-horizontal')) {
           return '/angular-core-elements/src/form/wrapped-submit.html';
         } else {
           return '/angular-core-elements/src/form/submit.html';
@@ -1021,7 +1021,13 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       require: '^coreForm',
       restrict: 'E',
       replace: true,
-      templateUrl: '/angular-core-elements/src/form/select.html',
+      templateUrl: function($element, $attrs) {
+        if ($element.parent().hasClass('form-horizontal')) {
+          return '/angular-core-elements/src/form/wrapped-select.html';
+        } else {
+          return '/angular-core-elements/src/form/select.html';
+        }
+      },
       link: function($scope, $element, $attrs, $ctrl) {
         var value;
         if ($scope.name == null) {
@@ -1039,6 +1045,45 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         });
         return $scope.$on($ctrl.getSendEvent(), function(_, params) {
           return params[$scope.name] = value;
+        });
+      }
+    };
+  }
+]).directive('coreTextarea', [
+  function() {
+    return {
+      scope: {
+        name: '@',
+        value: '=?',
+        label: '@',
+        lblClass: '@',
+        placeholder: '@',
+        wrpClass: '@'
+      },
+      require: '^coreForm',
+      restrict: 'E',
+      replace: true,
+      templateUrl: function($element, $attrs) {
+        if ($element.parent().hasClass('form-horizontal')) {
+          return '/angular-core-elements/src/form/wrapped-textarea.html';
+        } else {
+          return '/angular-core-elements/src/form/textarea.html';
+        }
+      },
+      link: function($scope, $element, $attrs, $ctrl) {
+        var parent, textarea;
+        textarea = angular.element($element[0].querySelector('textarea'));
+        parent = textarea.parent();
+        $scope.$on($ctrl.getSendEvent(), function(_, params) {
+          return params[textarea.attr('name')] = textarea.val();
+        });
+        $scope.$on($ctrl.getErrorEvent(), function(_, resp) {
+          if (resp.messages[$scope.name]) {
+            return parent.addClass('has-error');
+          }
+        });
+        return $scope.$on($ctrl.getCleanAfterSendEvent(), function() {
+          return textarea.val('');
         });
       }
     };
@@ -1093,7 +1138,7 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
     return {
       scope: {
         pageQueryName: '@',
-        rows: '=items',
+        items: '=?',
         itemsPerPage: '=?',
         itemsCount: '=?',
         currentPage: '=?',
@@ -1190,7 +1235,14 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
         if ($scope.itemsCount && $scope.itemsPerPage) {
           $scope.selectPage($scope.currentPage);
         }
-        return $scope.changeUrlOnStart = true;
+        $scope.changeUrlOnStart = true;
+        return parentScope.$watch(this.getCollectionName(), (function(_this) {
+          return function(newRows, oldRows, scope) {
+            if ((scope[_this.getCollectionName()] != null) && $scope.items !== scope[_this.getCollectionName()]) {
+              return $scope.items = scope[_this.getCollectionName()];
+            }
+          };
+        })(this), true);
       }
     };
   }
@@ -1203,9 +1255,13 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
       },
       restrict: 'E',
       require: '^coreTable',
-      link: function($scope, $element, $attrs, $ctrl) {
-        $scope.content = $element.html();
-        return $ctrl.add($scope);
+      compile: function($element, $attrs) {
+        var content;
+        content = $element.html();
+        return function($scope, $element, $attrs, $ctrl) {
+          $scope.content = content;
+          return $ctrl.add($scope);
+        };
       }
     };
   }
@@ -1260,9 +1316,13 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
       },
       restrict: 'E',
       require: '^coreDetails',
-      link: function($scope, $element, $attrs, $ctrl) {
-        $scope.content = $element.html();
-        return $ctrl.add($scope);
+      compile: function($element, $attrs) {
+        var content;
+        content = $element.html();
+        return function($scope, $element, $attrs, $ctrl) {
+          $scope.content = content;
+          return $ctrl.add($scope);
+        };
       }
     };
   }
@@ -1272,7 +1332,6 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
       restrict: 'A',
       require: '^coreDetails',
       link: function($scope, $element, $attrs, $ctrl) {
-        console.log($element, $scope.row.content, $ctrl.getCollectionName(), $ctrl.getParentScope());
         return compileCell($element, $scope.row.content, $ctrl.getCollectionName(), $ctrl.getParentScope());
       }
     };
