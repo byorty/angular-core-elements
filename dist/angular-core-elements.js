@@ -692,7 +692,7 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
       replace: true,
       templateUrl: '/angular-core-elements/src/dropdown/dropdown.html',
       controller: function($scope) {
-        var ANY_VALUE, hasItems, selectById, selectDefault, updateItems;
+        var ANY_VALUE, hasItems, selectDefault, updateItems;
         ANY_VALUE = '__ANY__';
         $scope.isOpen = false;
         if ($scope.changeUrl == null) {
@@ -730,6 +730,20 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
             return $location.search($scope.queryName, null);
           }
         };
+        $scope.selectById = function(id) {
+          var i, item, ref, results;
+          ref = $scope.items;
+          results = [];
+          for (i in ref) {
+            item = ref[i];
+            if (item.id === id) {
+              results.push($scope.select(item));
+            } else {
+              results.push(void 0);
+            }
+          }
+          return results;
+        };
         $scope.$watch('items', function(newItems, oldItems) {
           if (newItems !== oldItems) {
             return updateItems();
@@ -749,27 +763,13 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
           if ($scope.selected != null) {
             $scope.select($scope.selected);
           } else if (($scope.queryName != null) && (search[$scope.queryName] != null)) {
-            selectById(parseInt(search[$scope.queryName]));
+            $scope.selectById(parseInt(search[$scope.queryName]));
           } else {
             $scope.select($scope.items[0]);
           }
           if (hasItems()) {
             return $scope.changeUrlOnStart = true;
           }
-        };
-        selectById = function(id) {
-          var i, item, ref, results;
-          ref = $scope.items;
-          results = [];
-          for (i in ref) {
-            item = ref[i];
-            if (item.id === id) {
-              results.push($scope.select(item));
-            } else {
-              results.push(void 0);
-            }
-          }
-          return results;
         };
         updateItems = function() {
           if ($scope.hasAny) {
@@ -810,6 +810,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       transclude: true,
       templateUrl: '/angular-core-elements/src/form/form.html',
       controller: function($scope) {
+        var listeners, trigger;
         if ($scope.service == null) {
           throw new Error('service should be defined');
         }
@@ -830,8 +831,26 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         }
         $scope.cleanAfterSendEvent = 'form.clean';
         $scope.error = null;
-        this.add = function(input) {
-          return $scope.inputs.push(input);
+        listeners = {};
+        listeners[$scope.successEvent] = {};
+        listeners[$scope.sendEvent] = {};
+        listeners[$scope.receiveEvent] = {};
+        listeners[$scope.errorEvent] = {};
+        listeners[$scope.cleanAfterSendEvent] = {};
+        trigger = function(event, params) {
+          var _, callback, ref, results;
+          ref = listeners[event];
+          results = [];
+          for (_ in ref) {
+            callback = ref[_];
+            results.push(callback(params));
+          }
+          return results;
+        };
+        this.addListener = function(event, name, callback) {
+          if (listeners[event][name] == null) {
+            return listeners[event][name] = callback;
+          }
         };
         this.getSuccessEvent = function() {
           return $scope.successEvent;
@@ -851,14 +870,14 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         return this.send = function() {
           var params;
           params = {};
-          $scope.$broadcast($scope.sendEvent, params);
+          trigger($scope.sendEvent, params);
           $scope.$emit($scope.sendEvent, params);
           return $service.getByPath($scope.service)(params, function(resp) {
             var error, errors, name;
-            $scope.$broadcast($scope.receiveEvent, resp);
+            trigger($scope.receiveEvent, resp);
             $scope.$emit($scope.receiveEvent, resp);
             if (resp.success === true) {
-              $scope.$broadcast($scope.successEvent, resp);
+              trigger($scope.successEvent, resp);
               $scope.$emit($scope.successEvent, resp);
               if ($scope.cleanAfterSend === true) {
                 $scope.$broadcast($scope.cleanAfterSendEvent, resp);
@@ -872,7 +891,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
                 $scope.error = resp.message;
               }
               if (resp.messages != null) {
-                $scope.$broadcast($scope.errorEvent, resp);
+                trigger($scope.errorEvent, resp);
                 errors = (function() {
                   var ref, results;
                   ref = resp.messages;
@@ -926,7 +945,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         }
         input = angular.element($element[0].querySelector('input'));
         parent = input.parent();
-        $scope.$on($ctrl.getSendEvent(), function(_, params) {
+        $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
           if (input && $scope.name) {
             parent.removeClass('has-error');
             if ($scope.type === 'checkbox' || $scope.type === 'radio') {
@@ -968,8 +987,10 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         if ($scope.name == null) {
           throw new Error('name should be defined');
         }
-        return $scope.$on($ctrl.getSendEvent(), function(_, params) {
-          return params[$scope.name] = $scope.value;
+        return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
+          if ($scope.value) {
+            return params[$scope.name] = $scope.value;
+          }
         });
       }
     };
@@ -998,10 +1019,10 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
           $scope.btnClass = 'btn-success';
         }
         btn = angular.element($element[0].querySelector('button'));
-        $scope.$on($ctrl.getSendEvent(), function() {
+        $ctrl.addListener($ctrl.getSendEvent(), 'submit', function() {
           return btn.addClass('disabled');
         });
-        return $scope.$on($ctrl.getReceiveEvent(), function() {
+        return $ctrl.addListener($ctrl.getReceiveEvent(), 'submit', function() {
           return btn.removeClass('disabled')[0].blur();
         });
       }
@@ -1016,7 +1037,9 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         lblClass: '@',
         wrpClass: '@',
         items: '=',
-        selected: '=?'
+        selected: '=?',
+        selectedId: '=?',
+        anyName: '@'
       },
       require: '^coreForm',
       restrict: 'E',
@@ -1034,16 +1057,24 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
           throw new Error('name should be defined');
         }
         $scope.selectEvent = $scope.name + ".dropdown.select";
+        if ($scope.anyName == null) {
+          $scope.anyName = 'Выбрать';
+        }
         value = 0;
         $scope.$watch('selected', function(newSelected, oldSelected) {
-          if (newSelected !== oldSelected) {
+          if (newSelected != null) {
             return $scope.$$childHead.select($scope.selected);
+          }
+        });
+        $scope.$watch('selectedId', function(newSelected, oldSelected) {
+          if (newSelected != null) {
+            return $scope.$$childHead.selectById($scope.selectedId);
           }
         });
         $scope.$on($scope.selectEvent, function(_, selected) {
           return value = selected != null ? selected.id : void 0;
         });
-        return $scope.$on($ctrl.getSendEvent(), function(_, params) {
+        return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
           return params[$scope.name] = value;
         });
       }
@@ -1058,7 +1089,9 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         label: '@',
         lblClass: '@',
         placeholder: '@',
-        wrpClass: '@'
+        wrpClass: '@',
+        rows: '=?',
+        cols: '=?'
       },
       require: '^coreForm',
       restrict: 'E',
@@ -1072,18 +1105,55 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       },
       link: function($scope, $element, $attrs, $ctrl) {
         var parent, textarea;
+        if ($scope.name == null) {
+          throw new Error('name should be defined');
+        }
         textarea = angular.element($element[0].querySelector('textarea'));
         parent = textarea.parent();
-        $scope.$on($ctrl.getSendEvent(), function(_, params) {
-          return params[textarea.attr('name')] = textarea.val();
+        $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
+          return params[$scope.name] = textarea.val();
         });
-        $scope.$on($ctrl.getErrorEvent(), function(_, resp) {
+        $ctrl.addListener($ctrl.getErrorEvent(), $scope.name, function(resp) {
           if (resp.messages[$scope.name]) {
             return parent.addClass('has-error');
           }
         });
-        return $scope.$on($ctrl.getCleanAfterSendEvent(), function() {
+        return $ctrl.addListener($ctrl.getCleanAfterSendEvent(), $scope.name, function(params) {
           return textarea.val('');
+        });
+      }
+    };
+  }
+]).directive('coreCheckbox', [
+  function() {
+    return {
+      scope: {
+        name: '@',
+        value: '=?',
+        label: '@',
+        lblClass: '@',
+        placeholder: '@',
+        wrpClass: '@',
+        checked: '=?'
+      },
+      require: '^coreForm',
+      restrict: 'E',
+      replace: true,
+      templateUrl: function($element, $attrs) {
+        if ($element.parent().hasClass('form-horizontal')) {
+          return '/angular-core-elements/src/form/wrapped-checkbox.html';
+        } else {
+          return '/angular-core-elements/src/form/checkbox.html';
+        }
+      },
+      link: function($scope, $element, $attrs, $ctrl) {
+        if ($scope.name == null) {
+          throw new Error('name should be defined');
+        }
+        return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
+          if ($scope.checked) {
+            return params[$scope.name] = $scope.value;
+          }
         });
       }
     };
@@ -1127,6 +1197,79 @@ angular.module('ngCoreElementModal', []).directive('coreModal', [
           return angular.element(document.querySelector($scope.opener)).bind($scope.openerEvent, function() {
             return $scope.open();
           });
+        }
+      }
+    };
+  }
+]);
+
+angular.module('ngCoreElementPanel', []).directive('corePanel', [
+  function() {
+    return {
+      restrict: 'E',
+      replace: true,
+      transclude: true,
+      templateUrl: '/angular-core-elements/src/panel/panel.html'
+    };
+  }
+]).directive('corePanelHeader', [
+  '$timeout', '$location', '$rootScope', function($timeout, $location, $rootScope) {
+    return {
+      scope: {
+        hasSearch: '=?',
+        changeUrl: '=?',
+        queryName: '@',
+        delay: '=?',
+        searchEvent: '@',
+        placeholder: '@'
+      },
+      require: '^corePanel',
+      restrict: 'E',
+      replace: true,
+      transclude: true,
+      templateUrl: '/angular-core-elements/src/panel/panel-header.html',
+      controller: function($scope) {
+        var promise, search;
+        $scope.search = null;
+        if ($scope.queryName == null) {
+          $scope.queryName = 'search';
+        }
+        if ($scope.changeUrl == null) {
+          $scope.changeUrl = true;
+        }
+        if ($scope.hasSearch == null) {
+          $scope.hasSearch = false;
+        }
+        if ($scope.delay == null) {
+          $scope.delay = 1000;
+        }
+        if ($scope.searchEvent == null) {
+          $scope.searchEvent = 'panel.header.search';
+        }
+        promise = null;
+        $scope.$watch('search', function() {
+          if ($scope.search != null) {
+            if (promise != null) {
+              $timeout.cancel(promise);
+            }
+            return promise = $timeout(function() {
+              $rootScope.$broadcast($scope.searchEvent, $scope.search);
+              if (!$scope.search.length) {
+                $scope.search = null;
+              }
+              if ($scope.changeUrl) {
+                $location.search($scope.queryName, $scope.search);
+                return $location.search('page', null);
+              }
+            }, $scope.delay);
+          }
+        });
+        $scope.onSearch = function(search) {
+          return $scope.search = search;
+        };
+        search = $location.search();
+        if (search[$scope.queryName] != null) {
+          return $scope.search = search[$scope.queryName];
         }
       }
     };
@@ -1340,7 +1483,7 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
   '$compile', function($compile) {
     return function(element, content, replaced, parentScope) {
       var reg;
-      reg = new RegExp('item', 'g');
+      reg = new RegExp('item(?!s)', 'g');
       element.append(content.replace(reg, replaced));
       return $compile(element.contents())(parentScope);
     };

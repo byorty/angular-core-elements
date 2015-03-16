@@ -1,7 +1,7 @@
 <div class="form-group">
     <label ng-if="label" class="{{lblClass}}">{{label}}</label>
     <span>
-        <core-dropdown items="items" select-event="{{selectEvent}}"></core-dropdown>
+        <core-dropdown items="items" select-event="{{selectEvent}}" has-any="true" any-name="{{anyName}}"></core-dropdown>
         <input type="hidden" name="{{name}}" value="{{value.id}}"/>
     </span>
 </div>

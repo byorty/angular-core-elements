@@ -55,8 +55,7 @@ angular
                 end = start if start > end
 
                 for i in [start..end]
-                    $scope.pages.push(i);
-
+                    $scope.pages.push(i)
 
             @add = (cell) -> $scope.cells.push(cell)
             @getCollectionName = -> $attrs.items

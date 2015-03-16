@@ -2,7 +2,8 @@
     <h4 ng-transclude class="pull-left"></h4>
     <div class="pull-left search" ng-if="hasSearch">
         <input type="text"
-               ng-model="form.search"
+               ng-model="search"
+               ng-change="onSearch(search)"
                class="form-control"
                placeholder="{{placeholder}}"/>
     </div>

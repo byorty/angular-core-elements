@@ -23,8 +23,17 @@ angular
             $scope.errorEvent = 'form.error' unless $scope.errorEvent?
             $scope.cleanAfterSendEvent = 'form.clean'
             $scope.error = null
+            listeners = {}
+            listeners[$scope.successEvent] = {}
+            listeners[$scope.sendEvent] = {}
+            listeners[$scope.receiveEvent] = {}
+            listeners[$scope.errorEvent] = {}
+            listeners[$scope.cleanAfterSendEvent] = {}
 
-            @add = (input) -> $scope.inputs.push(input)
+            trigger = (event, params) ->
+                callback(params) for _, callback of listeners[event]
+
+            @addListener = (event, name, callback) -> listeners[event][name] = (callback) unless listeners[event][name]?
             @getSuccessEvent = -> $scope.successEvent
             @getSendEvent = -> $scope.sendEvent
             @getReceiveEvent = -> $scope.receiveEvent
@@ -32,13 +41,13 @@ angular
             @getCleanAfterSendEvent = -> $scope.cleanAfterSendEvent
             @send = ->
                 params = {}
-                $scope.$broadcast($scope.sendEvent, params)
+                trigger($scope.sendEvent, params)
                 $scope.$emit($scope.sendEvent, params)
                 $service.getByPath($scope.service)(params, (resp) ->
-                    $scope.$broadcast($scope.receiveEvent, resp)
+                    trigger($scope.receiveEvent, resp)
                     $scope.$emit($scope.receiveEvent, resp)
                     if resp.success is true
-                        $scope.$broadcast($scope.successEvent, resp)
+                        trigger($scope.successEvent, resp)
                         $scope.$emit($scope.successEvent, resp)
                         $scope.$broadcast($scope.cleanAfterSendEvent, resp) if $scope.cleanAfterSend is true
                         $window.location.href = $scope.successRedirect if $scope.successRedirect?
@@ -48,7 +57,7 @@ angular
                             $scope.error = resp.message
 
                         if resp.messages?
-                            $scope.$broadcast($scope.errorEvent, resp)
+                            trigger($scope.errorEvent, resp)
                             errors = for name, error of resp.messages
                                 "<div class=#{name}>#{error.message}</div>"
                             $scope.error = errors.join('');
@@ -81,16 +90,20 @@ angular
             input = angular.element($element[0].querySelector('input'))
             parent = input.parent()
 
-            $scope.$on($ctrl.getSendEvent(), (_, params) ->
-                if input and $scope.name
-                    parent.removeClass('has-error')
-                    if $scope.type is 'checkbox' or $scope.type is 'radio'
-                        if input.val()
-                            params[input.attr('name')] = input.val()
-                    else
-                        if input.val()
-                            params[input.attr('name')] = input.val()
+            $ctrl.addListener(
+                $ctrl.getSendEvent()
+                $scope.name
+                (params) ->
+                    if input and $scope.name
+                        parent.removeClass('has-error')
+                        if $scope.type is 'checkbox' or $scope.type is 'radio'
+                            if input.val()
+                                params[input.attr('name')] = input.val()
+                        else
+                            if input.val()
+                                params[input.attr('name')] = input.val()
             )
+
 
             $scope.$on($ctrl.getErrorEvent(), (_, resp) ->
                 parent.addClass('has-error') if resp.messages[$scope.name]
@@ -111,8 +124,10 @@ angular
         link: ($scope, $element, $attrs, $ctrl) ->
             throw new Error('name should be defined') unless $scope.name?
 
-            $scope.$on($ctrl.getSendEvent(), (_, params) ->
-                params[$scope.name] = $scope.value
+            $ctrl.addListener(
+                $ctrl.getSendEvent()
+                $scope.name
+                (params) -> params[$scope.name] = $scope.value if $scope.value
             )
     ])
     .directive('coreSubmit', [ ->
@@ -132,11 +147,16 @@ angular
 
             btn = angular.element($element[0].querySelector('button'))
 
-            $scope.$on($ctrl.getSendEvent(), ->
-                btn.addClass('disabled');
+            $ctrl.addListener(
+                $ctrl.getSendEvent()
+                'submit'
+                -> btn.addClass('disabled')
             )
-            $scope.$on($ctrl.getReceiveEvent(), ->
-                btn.removeClass('disabled')[0].blur()
+
+            $ctrl.addListener(
+                $ctrl.getReceiveEvent()
+                'submit'
+                -> btn.removeClass('disabled')[0].blur()
             )
     ])
     .directive('coreSelect', [ ->
@@ -148,6 +168,7 @@ angular
             items: '='
             selected: '=?'
             selectedId: '=?'
+            anyName: '@'
         require: '^coreForm'
         restrict: 'E'
         replace: true
@@ -158,18 +179,19 @@ angular
         link: ($scope, $element, $attrs, $ctrl) ->
             throw new Error('name should be defined') unless $scope.name?
             $scope.selectEvent = "#{$scope.name}.dropdown.select"
+            $scope.anyName = 'Выбрать' unless $scope.anyName?
             value = 0
 
             $scope.$watch(
                 'selected'
                 (newSelected, oldSelected) ->
-                    $scope.$$childHead.select($scope.selected) if newSelected isnt oldSelected
+                    $scope.$$childHead.select($scope.selected) if newSelected?
             )
 
             $scope.$watch(
                 'selectedId'
                 (newSelected, oldSelected) ->
-                    $scope.$$childHead.selectById($scope.selectedId) if newSelected isnt oldSelected
+                    $scope.$$childHead.selectById($scope.selectedId) if newSelected?
             )
 
             $scope.$on(
@@ -177,8 +199,10 @@ angular
                 (_, selected) -> value = selected?.id
             )
 
-            $scope.$on($ctrl.getSendEvent(), (_, params) ->
-                params[$scope.name] = value
+            $ctrl.addListener(
+                $ctrl.getSendEvent()
+                $scope.name
+                (params) -> params[$scope.name] = value
             )
     ])
     .directive('coreTextarea', [ ->
@@ -199,18 +223,50 @@ angular
                 '/angular-core-elements/src/form/wrapped-textarea.html'
             else '/angular-core-elements/src/form/textarea.html'
         link: ($scope, $element, $attrs, $ctrl) ->
+            throw new Error('name should be defined') unless $scope.name?
             textarea = angular.element($element[0].querySelector('textarea'))
             parent = textarea.parent()
 
-            $scope.$on($ctrl.getSendEvent(), (_, params) ->
-                params[textarea.attr('name')] = textarea.val()
+            $ctrl.addListener(
+                $ctrl.getSendEvent()
+                $scope.name
+                (params) -> params[$scope.name] = textarea.val()
             )
 
-            $scope.$on($ctrl.getErrorEvent(), (_, resp) ->
-                parent.addClass('has-error') if resp.messages[$scope.name]
+            $ctrl.addListener(
+                $ctrl.getErrorEvent()
+                $scope.name
+                (resp) -> parent.addClass('has-error') if resp.messages[$scope.name]
             )
 
-            $scope.$on($ctrl.getCleanAfterSendEvent(), ->
-                textarea.val('')
+            $ctrl.addListener(
+                $ctrl.getCleanAfterSendEvent()
+                $scope.name
+                (params) -> textarea.val('')
+            )
+    ])
+    .directive('coreCheckbox', [ ->
+        scope:
+            name: '@'
+            value: '=?'
+            label: '@'
+            lblClass: '@'
+            placeholder: '@'
+            wrpClass: '@'
+            checked: '=?'
+        require: '^coreForm'
+        restrict: 'E'
+        replace: true
+        templateUrl: ($element, $attrs) ->
+            if $element.parent().hasClass('form-horizontal')
+                '/angular-core-elements/src/form/wrapped-checkbox.html'
+            else '/angular-core-elements/src/form/checkbox.html'
+        link: ($scope, $element, $attrs, $ctrl) ->
+            throw new Error('name should be defined') unless $scope.name?
+
+            $ctrl.addListener(
+                $ctrl.getSendEvent()
+                $scope.name
+                (params) -> params[$scope.name] = $scope.value if $scope.checked
             )
     ])

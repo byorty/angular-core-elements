@@ -20,7 +20,7 @@ angular
         transclude: true
         templateUrl: '/angular-core-elements/src/panel/panel-header.html'
         controller: ($scope) ->
-            $scope.form = {}
+            $scope.search = null
             $scope.queryName = 'search' unless $scope.queryName?
             $scope.changeUrl = true unless $scope.changeUrl?
             $scope.hasSearch = false unless $scope.hasSearch?
@@ -29,19 +29,23 @@ angular
 
             promise = null
             $scope.$watch(
-                'form.search'
+                'search'
                 ->
-                    if $scope.form.search?
+                    if $scope.search?
                         if promise? then $timeout.cancel(promise)
                         promise = $timeout(
                             ->
-                                $rootScope.$broadcast($scope.searchEvent, $scope.form.search)
-                                $scope.form.search = null if !$scope.form.search.length
+                                $rootScope.$broadcast($scope.searchEvent, $scope.search)
+                                $scope.search = null if !$scope.search.length
                                 if $scope.changeUrl
-                                    $location.search($scope.queryName, $scope.form.search)
+                                    $location.search($scope.queryName, $scope.search)
                                     $location.search('page', null)
                             $scope.delay
                         )
-                true
             )
+
+            $scope.onSearch = (search) -> $scope.search = search
+
+            search = $location.search()
+            $scope.search = search[$scope.queryName] if search[$scope.queryName]?
     ])

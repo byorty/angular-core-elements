@@ -17,6 +17,7 @@ module.exports = function (grunt) {
                         'src/dropdown/dropdown.coffee',
                         'src/form/form.coffee',
                         'src/modal/modal.coffee',
+                        'src/panel/panel.coffee',
                         'src/table/table.coffee',
                     ]
                 }
@@ -117,7 +118,7 @@ module.exports = function (grunt) {
             'concat',
             'wrap',
             'uglify',
-            'less',
+            //'less',
             'clean',
         ]
     );
