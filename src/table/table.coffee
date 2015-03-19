@@ -16,7 +16,7 @@ angular
         replace: true
         transclude: true
         templateUrl: '/angular-core-elements/src/table/table.html'
-        controller: ($scope, $element, $attrs) ->
+        controller: ['$scope', '$element', '$attrs', ($scope, $element, $attrs) ->
             $scope.cells = []
             $scope.cellElements = []
             $scope.pageQueryName = 'page' unless $scope.pageQueryName?
@@ -77,6 +77,7 @@ angular
                     $scope.items = scope[@getCollectionName()] if scope[@getCollectionName()]? and $scope.items isnt scope[@getCollectionName()]
                 true
             )
+        ]
     ])
     .directive('coreCol', [ ->
         scope:
@@ -104,7 +105,7 @@ angular
         replace: true
         transclude: true
         templateUrl: '/angular-core-elements/src/table/details.html'
-        controller: ($scope, $element, $attrs) ->
+        controller: ['$scope', '$element', '$attrs', ($scope, $element, $attrs) ->
             $scope.rows = []
             parentScope = $scope
 
@@ -114,6 +115,7 @@ angular
 
             while parentScope isnt null and !parentScope.hasOwnProperty(@getCollectionName())
                 parentScope = parentScope.$parent
+        ]
     ])
     .directive('coreRow', [ ->
         scope:

@@ -3,7 +3,7 @@
 var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
-angular.module('ngCoreElements', ['ngCoreElementButton', 'ngCoreElementDatepicker', 'ngCoreElementDropdown', 'ngCoreElementForm', 'ngCoreElementModal', 'ngCoreElementPanel', 'ngCoreElementTable', 'ngCoreElementAutocomplete']).factory('$service', [
+angular.module('ngCoreElements', ['ngCoreElementAutocomplete', 'ngCoreElementButton', 'ngCoreElementDatepicker', 'ngCoreElementDropdown', 'ngCoreElementForm', 'ngCoreElementModal', 'ngCoreElementPanel', 'ngCoreElementTable']).factory('$service', [
   function() {
     var Service;
     return Service = (function() {
@@ -264,6 +264,8 @@ Date.replaceCharsLocale = {
     return this.getFullYear();
   }
 };
+
+angular.module('ngCoreElementAutocomplete', []).directive('coreAutocomplete', [function() {}]);
 
 angular.module('ngCoreElementButton', []).directive('coreButton', [
   function() {
@@ -603,68 +605,70 @@ angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
       restrict: 'E',
       replace: true,
       templateUrl: '/angular-core-elements/src/datepicker/datepicker.html',
-      controller: function($scope) {
-        var search;
-        $scope.page = 0;
-        $scope.isOpen = false;
-        $scope.value = null;
-        $scope.now = new Date();
-        if ($scope.type == null) {
-          $scope.type = 'day';
-        }
-        if ($scope.startDay == null) {
-          $scope.startDay = 1;
-        }
-        if ($scope.changeUrl == null) {
-          $scope.changeUrl = false;
-        }
-        if ($scope.changeUrlOnStart == null) {
-          $scope.changeUrlOnStart = false;
-        }
-        if ($scope.queryName == null) {
-          $scope.queryName = 'datepicker';
-        }
-        if ($scope.headerMonthFormat == null) {
-          $scope.headerMonthFormat = 'F';
-        }
-        if ($scope.headerYearFormat == null) {
-          $scope.headerYearFormat = 'Y';
-        }
-        if ($scope.iconLeft == null) {
-          $scope.iconLeft = 'glyphicon glyphicon-chevron-left';
-        }
-        if ($scope.iconRight == null) {
-          $scope.iconRight = 'glyphicon glyphicon-chevron-right';
-        }
-        if ($scope.format == null) {
-          $scope.format = 'Y-m-d';
-        }
-        if ($scope.current != null) {
-          $scope.current = typeof $scope.current === 'string' ? new Date($scope.current) : void 0;
-          $scope.value = $scope.current.format($scope.format);
-        } else {
-          search = $location.search();
-          if ((search[$scope.queryName] != null) && search[$scope.queryName].length) {
-            $scope.current = new Date(search[$scope.queryName]);
+      controller: [
+        '$scope', function($scope) {
+          var search;
+          $scope.page = 0;
+          $scope.isOpen = false;
+          $scope.value = null;
+          $scope.now = new Date();
+          if ($scope.type == null) {
+            $scope.type = 'day';
+          }
+          if ($scope.startDay == null) {
+            $scope.startDay = 1;
+          }
+          if ($scope.changeUrl == null) {
+            $scope.changeUrl = false;
+          }
+          if ($scope.changeUrlOnStart == null) {
+            $scope.changeUrlOnStart = false;
+          }
+          if ($scope.queryName == null) {
+            $scope.queryName = 'datepicker';
+          }
+          if ($scope.headerMonthFormat == null) {
+            $scope.headerMonthFormat = 'F';
+          }
+          if ($scope.headerYearFormat == null) {
+            $scope.headerYearFormat = 'Y';
+          }
+          if ($scope.iconLeft == null) {
+            $scope.iconLeft = 'glyphicon glyphicon-chevron-left';
+          }
+          if ($scope.iconRight == null) {
+            $scope.iconRight = 'glyphicon glyphicon-chevron-right';
+          }
+          if ($scope.format == null) {
+            $scope.format = 'Y-m-d';
+          }
+          if ($scope.current != null) {
+            $scope.current = typeof $scope.current === 'string' ? new Date($scope.current) : void 0;
             $scope.value = $scope.current.format($scope.format);
           } else {
-            $scope.current = new Date($scope.now.getFullYear(), $scope.now.getMonth(), $scope.now.getDate());
+            search = $location.search();
+            if ((search[$scope.queryName] != null) && search[$scope.queryName].length) {
+              $scope.current = new Date(search[$scope.queryName]);
+              $scope.value = $scope.current.format($scope.format);
+            } else {
+              $scope.current = new Date($scope.now.getFullYear(), $scope.now.getMonth(), $scope.now.getDate());
+            }
+          }
+          $scope.open = function() {
+            return $scope.isOpen = true;
+          };
+          $scope.selectMonth = function() {
+            return changePicker(new MonthsPicker(), $scope);
+          };
+          $scope.selectYear = function() {
+            $scope.page = 0;
+            return changePicker(new YearsPicker(), $scope);
+          };
+          if (pickerByType[$scope.type]) {
+            return changePicker(new pickerByType[$scope.type](), $scope);
           }
         }
-        $scope.open = function() {
-          return $scope.isOpen = true;
-        };
-        $scope.selectMonth = function() {
-          return changePicker(new MonthsPicker(), $scope);
-        };
-        $scope.selectYear = function() {
-          $scope.page = 0;
-          return changePicker(new YearsPicker(), $scope);
-        };
-        if (pickerByType[$scope.type]) {
-          return changePicker(new pickerByType[$scope.type](), $scope);
-        }
-      }
+      ]
     };
   }
 ]);
@@ -691,103 +695,105 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
       restrict: 'E',
       replace: true,
       templateUrl: '/angular-core-elements/src/dropdown/dropdown.html',
-      controller: function($scope) {
-        var ANY_VALUE, hasItems, selectDefault, updateItems;
-        ANY_VALUE = '__ANY__';
-        $scope.isOpen = false;
-        if ($scope.changeUrl == null) {
-          $scope.changeUrl = false;
-        }
-        if ($scope.changeUrlOnStart == null) {
-          $scope.changeUrlOnStart = false;
-        }
-        if ($scope.queryName == null) {
-          $scope.queryName = 'dropdown';
-        }
-        if ($scope.selectEvent == null) {
-          $scope.selectEvent = 'dropdown.select';
-        }
-        if ($scope.hasAny == null) {
-          $scope.hasAny = false;
-        }
-        if ($scope.anyName == null) {
-          $scope.anyName = 'Любой';
-        }
-        if ($scope.align == null) {
-          $scope.align = 'left';
-        }
-        $scope.open = function() {
-          return $scope.isOpen = $scope.isOpen ? false : true;
-        };
-        $scope.select = function(item) {
+      controller: [
+        '$scope', function($scope) {
+          var ANY_VALUE, hasItems, selectDefault, updateItems;
+          ANY_VALUE = '__ANY__';
           $scope.isOpen = false;
-          $scope.selected = item;
-          $rootScope.$broadcast($scope.selectEvent, $scope.selected);
-          if ($scope.changeUrl === true && $scope.changeUrlOnStart === true && item.id !== ANY_VALUE) {
-            $location.search($scope.queryName, $scope.selected.id);
+          if ($scope.changeUrl == null) {
+            $scope.changeUrl = false;
           }
-          if ($scope.changeUrl === true && $scope.changeUrlOnStart === true && item.id === ANY_VALUE) {
-            return $location.search($scope.queryName, null);
+          if ($scope.changeUrlOnStart == null) {
+            $scope.changeUrlOnStart = false;
           }
-        };
-        $scope.selectById = function(id) {
-          var i, item, ref, results;
-          ref = $scope.items;
-          results = [];
-          for (i in ref) {
-            item = ref[i];
-            if (item.id === id) {
-              results.push($scope.select(item));
-            } else {
-              results.push(void 0);
+          if ($scope.queryName == null) {
+            $scope.queryName = 'dropdown';
+          }
+          if ($scope.selectEvent == null) {
+            $scope.selectEvent = 'dropdown.select';
+          }
+          if ($scope.hasAny == null) {
+            $scope.hasAny = false;
+          }
+          if ($scope.anyName == null) {
+            $scope.anyName = 'Любой';
+          }
+          if ($scope.align == null) {
+            $scope.align = 'left';
+          }
+          $scope.open = function() {
+            return $scope.isOpen = $scope.isOpen ? false : true;
+          };
+          $scope.select = function(item) {
+            $scope.isOpen = false;
+            $scope.selected = item;
+            $rootScope.$broadcast($scope.selectEvent, $scope.selected);
+            if ($scope.changeUrl === true && $scope.changeUrlOnStart === true && item.id !== ANY_VALUE) {
+              $location.search($scope.queryName, $scope.selected.id);
             }
-          }
-          return results;
-        };
-        $scope.$watch('items', function(newItems, oldItems) {
-          if (newItems !== oldItems) {
+            if ($scope.changeUrl === true && $scope.changeUrlOnStart === true && item.id === ANY_VALUE) {
+              return $location.search($scope.queryName, null);
+            }
+          };
+          $scope.selectById = function(id) {
+            var i, item, ref, results;
+            ref = $scope.items;
+            results = [];
+            for (i in ref) {
+              item = ref[i];
+              if (item.id === id) {
+                results.push($scope.select(item));
+              } else {
+                results.push(void 0);
+              }
+            }
+            return results;
+          };
+          $scope.$watch('items', function(newItems, oldItems) {
+            if (newItems !== oldItems) {
+              return updateItems();
+            }
+          });
+          $scope.$watch('selected', function(newSelected, oldSelected) {
+            if (newSelected !== oldSelected && $scope.selected) {
+              return $scope.select($scope.selected);
+            }
+          });
+          hasItems = function() {
+            return $scope.items != null;
+          };
+          selectDefault = function() {
+            var search;
+            search = $location.search();
+            if ($scope.selected != null) {
+              $scope.select($scope.selected);
+            } else if (($scope.queryName != null) && (search[$scope.queryName] != null)) {
+              $scope.selectById(parseInt(search[$scope.queryName]));
+            } else {
+              $scope.select($scope.items[0]);
+            }
+            if (hasItems()) {
+              return $scope.changeUrlOnStart = true;
+            }
+          };
+          updateItems = function() {
+            if ($scope.hasAny) {
+              return $timeout(function() {
+                $scope.items.unshift({
+                  id: ANY_VALUE,
+                  name: $scope.anyName
+                });
+                return selectDefault();
+              });
+            } else {
+              return selectDefault();
+            }
+          };
+          if (hasItems()) {
             return updateItems();
           }
-        });
-        $scope.$watch('selected', function(newSelected, oldSelected) {
-          if (newSelected !== oldSelected && $scope.selected) {
-            return $scope.select($scope.selected);
-          }
-        });
-        hasItems = function() {
-          return $scope.items != null;
-        };
-        selectDefault = function() {
-          var search;
-          search = $location.search();
-          if ($scope.selected != null) {
-            $scope.select($scope.selected);
-          } else if (($scope.queryName != null) && (search[$scope.queryName] != null)) {
-            $scope.selectById(parseInt(search[$scope.queryName]));
-          } else {
-            $scope.select($scope.items[0]);
-          }
-          if (hasItems()) {
-            return $scope.changeUrlOnStart = true;
-          }
-        };
-        updateItems = function() {
-          if ($scope.hasAny) {
-            return $timeout(function() {
-              $scope.items.unshift({
-                id: ANY_VALUE,
-                name: $scope.anyName
-              });
-              return selectDefault();
-            });
-          } else {
-            return selectDefault();
-          }
-        };
-        if (hasItems()) {
-          return updateItems();
         }
-      }
+      ]
     };
   }
 ]);
@@ -809,105 +815,107 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       replace: true,
       transclude: true,
       templateUrl: '/angular-core-elements/src/form/form.html',
-      controller: function($scope) {
-        var listeners, trigger;
-        if ($scope.service == null) {
-          throw new Error('service should be defined');
-        }
-        if ($scope.cleanAfterSend == null) {
-          $scope.cleanAfterSend = true;
-        }
-        if ($scope.successEvent == null) {
-          $scope.successEvent = 'form.success';
-        }
-        if ($scope.sendEvent == null) {
-          $scope.sendEvent = 'form.send';
-        }
-        if ($scope.receiveEvent == null) {
-          $scope.receiveEvent = 'form.receive';
-        }
-        if ($scope.errorEvent == null) {
-          $scope.errorEvent = 'form.error';
-        }
-        $scope.cleanAfterSendEvent = 'form.clean';
-        $scope.error = null;
-        listeners = {};
-        listeners[$scope.successEvent] = {};
-        listeners[$scope.sendEvent] = {};
-        listeners[$scope.receiveEvent] = {};
-        listeners[$scope.errorEvent] = {};
-        listeners[$scope.cleanAfterSendEvent] = {};
-        trigger = function(event, params) {
-          var _, callback, ref, results;
-          ref = listeners[event];
-          results = [];
-          for (_ in ref) {
-            callback = ref[_];
-            results.push(callback(params));
+      controller: [
+        '$scope', function($scope) {
+          var listeners, trigger;
+          if ($scope.service == null) {
+            throw new Error('service should be defined');
           }
-          return results;
-        };
-        this.addListener = function(event, name, callback) {
-          if (listeners[event][name] == null) {
-            return listeners[event][name] = callback;
+          if ($scope.cleanAfterSend == null) {
+            $scope.cleanAfterSend = true;
           }
-        };
-        this.getSuccessEvent = function() {
-          return $scope.successEvent;
-        };
-        this.getSendEvent = function() {
-          return $scope.sendEvent;
-        };
-        this.getReceiveEvent = function() {
-          return $scope.receiveEvent;
-        };
-        this.getErrorEvent = function() {
-          return $scope.errorEvent;
-        };
-        this.getCleanAfterSendEvent = function() {
-          return $scope.cleanAfterSendEvent;
-        };
-        return this.send = function() {
-          var params;
-          params = {};
-          trigger($scope.sendEvent, params);
-          $scope.$emit($scope.sendEvent, params);
-          return $service.getByPath($scope.service)(params, function(resp) {
-            var error, errors, name;
-            trigger($scope.receiveEvent, resp);
-            $scope.$emit($scope.receiveEvent, resp);
-            if (resp.success === true) {
-              trigger($scope.successEvent, resp);
-              $scope.$emit($scope.successEvent, resp);
-              if ($scope.cleanAfterSend === true) {
-                $scope.$broadcast($scope.cleanAfterSendEvent, resp);
-              }
-              if ($scope.successRedirect != null) {
-                return $window.location.href = $scope.successRedirect;
-              }
-            } else {
-              $scope.$emit($scope.errorEvent, resp);
-              if (resp.message != null) {
-                $scope.error = resp.message;
-              }
-              if (resp.messages != null) {
-                trigger($scope.errorEvent, resp);
-                errors = (function() {
-                  var ref, results;
-                  ref = resp.messages;
-                  results = [];
-                  for (name in ref) {
-                    error = ref[name];
-                    results.push("<div class=" + name + ">" + error.message + "</div>");
-                  }
-                  return results;
-                })();
-                return $scope.error = errors.join('');
-              }
+          if ($scope.successEvent == null) {
+            $scope.successEvent = 'form.success';
+          }
+          if ($scope.sendEvent == null) {
+            $scope.sendEvent = 'form.send';
+          }
+          if ($scope.receiveEvent == null) {
+            $scope.receiveEvent = 'form.receive';
+          }
+          if ($scope.errorEvent == null) {
+            $scope.errorEvent = 'form.error';
+          }
+          $scope.cleanAfterSendEvent = 'form.clean';
+          $scope.error = null;
+          listeners = {};
+          listeners[$scope.successEvent] = {};
+          listeners[$scope.sendEvent] = {};
+          listeners[$scope.receiveEvent] = {};
+          listeners[$scope.errorEvent] = {};
+          listeners[$scope.cleanAfterSendEvent] = {};
+          trigger = function(event, params) {
+            var _, callback, ref, results;
+            ref = listeners[event];
+            results = [];
+            for (_ in ref) {
+              callback = ref[_];
+              results.push(callback(params));
             }
-          });
-        };
-      },
+            return results;
+          };
+          this.addListener = function(event, name, callback) {
+            if (listeners[event][name] == null) {
+              return listeners[event][name] = callback;
+            }
+          };
+          this.getSuccessEvent = function() {
+            return $scope.successEvent;
+          };
+          this.getSendEvent = function() {
+            return $scope.sendEvent;
+          };
+          this.getReceiveEvent = function() {
+            return $scope.receiveEvent;
+          };
+          this.getErrorEvent = function() {
+            return $scope.errorEvent;
+          };
+          this.getCleanAfterSendEvent = function() {
+            return $scope.cleanAfterSendEvent;
+          };
+          return this.send = function() {
+            var params;
+            params = {};
+            trigger($scope.sendEvent, params);
+            $scope.$emit($scope.sendEvent, params);
+            return $service.getByPath($scope.service)(params, function(resp) {
+              var error, errors, name;
+              trigger($scope.receiveEvent, resp);
+              $scope.$emit($scope.receiveEvent, resp);
+              if (resp.success === true) {
+                trigger($scope.successEvent, resp);
+                $scope.$emit($scope.successEvent, resp);
+                if ($scope.cleanAfterSend === true) {
+                  $scope.$broadcast($scope.cleanAfterSendEvent, resp);
+                }
+                if ($scope.successRedirect != null) {
+                  return $window.location.href = $scope.successRedirect;
+                }
+              } else {
+                $scope.$emit($scope.errorEvent, resp);
+                if (resp.message != null) {
+                  $scope.error = resp.message;
+                }
+                if (resp.messages != null) {
+                  trigger($scope.errorEvent, resp);
+                  errors = (function() {
+                    var ref, results;
+                    ref = resp.messages;
+                    results = [];
+                    for (name in ref) {
+                      error = ref[name];
+                      results.push("<div class=" + name + ">" + error.message + "</div>");
+                    }
+                    return results;
+                  })();
+                  return $scope.error = errors.join('');
+                }
+              }
+            });
+          };
+        }
+      ],
       link: function($scope, $element, $attrs, $ctrl) {
         return $element.bind('submit', function(event) {
           event.preventDefault();
@@ -1161,7 +1169,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
 ]);
 
 angular.module('ngCoreElementModal', []).directive('coreModal', [
-  '$rootScope', function($rootScope) {
+  function() {
     return {
       scope: {
         animation: '@',
@@ -1175,30 +1183,32 @@ angular.module('ngCoreElementModal', []).directive('coreModal', [
       replace: true,
       transclude: true,
       templateUrl: '/angular-core-elements/src/modal/modal.html',
-      controller: function($scope) {
-        if ($scope.animation == null) {
-          $scope.animation = 'fade';
+      controller: [
+        '$scope', function($scope) {
+          if ($scope.animation == null) {
+            $scope.animation = 'fade';
+          }
+          if ($scope.autoOpen == null) {
+            $scope.autoOpen = false;
+          }
+          $scope.isOpen = $scope.autoOpen === true ? true : false;
+          if ($scope.openerEvent == null) {
+            $scope.openerEvent = 'click';
+          }
+          $scope.model = this;
+          $scope.open = this.show = function() {
+            return $scope.isOpen = true;
+          };
+          $scope.close = this.hide = function() {
+            return $scope.isOpen = false;
+          };
+          if (($scope.opener != null) && $scope.opener.length) {
+            return angular.element(document.querySelector($scope.opener)).bind($scope.openerEvent, function() {
+              return $scope.open();
+            });
+          }
         }
-        if ($scope.autoOpen == null) {
-          $scope.autoOpen = false;
-        }
-        $scope.isOpen = $scope.autoOpen === true ? true : false;
-        if ($scope.openerEvent == null) {
-          $scope.openerEvent = 'click';
-        }
-        $scope.model = this;
-        $scope.open = this.show = function() {
-          return $scope.isOpen = true;
-        };
-        $scope.close = this.hide = function() {
-          return $scope.isOpen = false;
-        };
-        if (($scope.opener != null) && $scope.opener.length) {
-          return angular.element(document.querySelector($scope.opener)).bind($scope.openerEvent, function() {
-            return $scope.open();
-          });
-        }
-      }
+      ]
     };
   }
 ]);
@@ -1228,50 +1238,52 @@ angular.module('ngCoreElementPanel', []).directive('corePanel', [
       replace: true,
       transclude: true,
       templateUrl: '/angular-core-elements/src/panel/panel-header.html',
-      controller: function($scope) {
-        var promise, search;
-        $scope.search = null;
-        if ($scope.queryName == null) {
-          $scope.queryName = 'search';
-        }
-        if ($scope.changeUrl == null) {
-          $scope.changeUrl = true;
-        }
-        if ($scope.hasSearch == null) {
-          $scope.hasSearch = false;
-        }
-        if ($scope.delay == null) {
-          $scope.delay = 1000;
-        }
-        if ($scope.searchEvent == null) {
-          $scope.searchEvent = 'panel.header.search';
-        }
-        promise = null;
-        $scope.$watch('search', function() {
-          if ($scope.search != null) {
-            if (promise != null) {
-              $timeout.cancel(promise);
-            }
-            return promise = $timeout(function() {
-              $rootScope.$broadcast($scope.searchEvent, $scope.search);
-              if (!$scope.search.length) {
-                $scope.search = null;
-              }
-              if ($scope.changeUrl) {
-                $location.search($scope.queryName, $scope.search);
-                return $location.search('page', null);
-              }
-            }, $scope.delay);
+      controller: [
+        '$scope', function($scope) {
+          var promise, search;
+          $scope.search = null;
+          if ($scope.queryName == null) {
+            $scope.queryName = 'search';
           }
-        });
-        $scope.onSearch = function(search) {
-          return $scope.search = search;
-        };
-        search = $location.search();
-        if (search[$scope.queryName] != null) {
-          return $scope.search = search[$scope.queryName];
+          if ($scope.changeUrl == null) {
+            $scope.changeUrl = true;
+          }
+          if ($scope.hasSearch == null) {
+            $scope.hasSearch = false;
+          }
+          if ($scope.delay == null) {
+            $scope.delay = 1000;
+          }
+          if ($scope.searchEvent == null) {
+            $scope.searchEvent = 'panel.header.search';
+          }
+          promise = null;
+          $scope.$watch('search', function() {
+            if ($scope.search != null) {
+              if (promise != null) {
+                $timeout.cancel(promise);
+              }
+              return promise = $timeout(function() {
+                $rootScope.$broadcast($scope.searchEvent, $scope.search);
+                if (!$scope.search.length) {
+                  $scope.search = null;
+                }
+                if ($scope.changeUrl) {
+                  $location.search($scope.queryName, $scope.search);
+                  return $location.search('page', null);
+                }
+              }, $scope.delay);
+            }
+          });
+          $scope.onSearch = function(search) {
+            return $scope.search = search;
+          };
+          search = $location.search();
+          if (search[$scope.queryName] != null) {
+            return $scope.search = search[$scope.queryName];
+          }
         }
-      }
+      ]
     };
   }
 ]);
@@ -1295,98 +1307,100 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
       replace: true,
       transclude: true,
       templateUrl: '/angular-core-elements/src/table/table.html',
-      controller: function($scope, $element, $attrs) {
-        var parentScope, search;
-        $scope.cells = [];
-        $scope.cellElements = [];
-        if ($scope.pageQueryName == null) {
-          $scope.pageQueryName = 'page';
-        }
-        if ($scope.paginationEvent == null) {
-          $scope.paginationEvent = 'page.select';
-        }
-        if ($scope.itemsPerPage == null) {
-          $scope.itemsPerPage = 0;
-        }
-        if ($scope.itemsCount == null) {
-          $scope.itemsCount = 0;
-        }
-        if ($scope.currentPage == null) {
-          $scope.currentPage = 1;
-        }
-        if ($scope.displayedPages == null) {
-          $scope.displayedPages = 5;
-        }
-        if ($scope.changeUrl == null) {
-          $scope.changeUrl = false;
-        }
-        if ($scope.changeUrl == null) {
-          $scope.changeUrlOnStart = false;
-        }
-        if ($scope.itemsNotFound == null) {
-          $scope.itemsNotFound = 'Нет данных для отображения';
-        }
-        parentScope = $scope;
-        $scope.$on('pagination', function(event, pagination) {
-          $scope.itemsPerPage = pagination.itemsPerPage;
-          $scope.itemsCount = pagination.itemsCount;
-          return $scope.createPages();
-        });
-        $scope.selectPage = function(page) {
-          $scope.currentPage = page;
-          $scope.createPages();
-          if ($scope.changeUrl === true && $scope.changeUrlOnStart === true) {
-            $location.search($scope.pageQueryName, $scope.currentPage);
+      controller: [
+        '$scope', '$element', '$attrs', function($scope, $element, $attrs) {
+          var parentScope, search;
+          $scope.cells = [];
+          $scope.cellElements = [];
+          if ($scope.pageQueryName == null) {
+            $scope.pageQueryName = 'page';
           }
-          return $rootScope.$broadcast($scope.paginationEvent, $scope.currentPage);
-        };
-        $scope.createPages = function() {
-          var end, i, k, ref, ref1, results, start, totalPages;
-          $scope.pages = [];
-          start = Math.max(1, $scope.currentPage - Math.abs(Math.floor($scope.displayedPages / 2)));
-          end = start + $scope.displayedPages - 1;
-          totalPages = Math.ceil($scope.itemsCount / $scope.itemsPerPage);
-          if (end > totalPages) {
-            end = totalPages;
-            start = Math.max(1, end - $scope.displayedPages + 1);
+          if ($scope.paginationEvent == null) {
+            $scope.paginationEvent = 'page.select';
           }
-          if (start > end) {
-            end = start;
+          if ($scope.itemsPerPage == null) {
+            $scope.itemsPerPage = 0;
           }
-          results = [];
-          for (i = k = ref = start, ref1 = end; ref <= ref1 ? k <= ref1 : k >= ref1; i = ref <= ref1 ? ++k : --k) {
-            results.push($scope.pages.push(i));
+          if ($scope.itemsCount == null) {
+            $scope.itemsCount = 0;
           }
-          return results;
-        };
-        this.add = function(cell) {
-          return $scope.cells.push(cell);
-        };
-        this.getCollectionName = function() {
-          return $attrs.items;
-        };
-        this.getParentScope = function() {
-          return parentScope;
-        };
-        while (parentScope !== null && !parentScope.hasOwnProperty(this.getCollectionName())) {
-          parentScope = parentScope.$parent;
-        }
-        search = $location.search();
-        if (search[$scope.pageQueryName] != null) {
-          $scope.currentPage = parseInt(search[$scope.pageQueryName]);
-        }
-        if ($scope.itemsCount && $scope.itemsPerPage) {
-          $scope.selectPage($scope.currentPage);
-        }
-        $scope.changeUrlOnStart = true;
-        return parentScope.$watch(this.getCollectionName(), (function(_this) {
-          return function(newRows, oldRows, scope) {
-            if ((scope[_this.getCollectionName()] != null) && $scope.items !== scope[_this.getCollectionName()]) {
-              return $scope.items = scope[_this.getCollectionName()];
+          if ($scope.currentPage == null) {
+            $scope.currentPage = 1;
+          }
+          if ($scope.displayedPages == null) {
+            $scope.displayedPages = 5;
+          }
+          if ($scope.changeUrl == null) {
+            $scope.changeUrl = false;
+          }
+          if ($scope.changeUrl == null) {
+            $scope.changeUrlOnStart = false;
+          }
+          if ($scope.itemsNotFound == null) {
+            $scope.itemsNotFound = 'Нет данных для отображения';
+          }
+          parentScope = $scope;
+          $scope.$on('pagination', function(event, pagination) {
+            $scope.itemsPerPage = pagination.itemsPerPage;
+            $scope.itemsCount = pagination.itemsCount;
+            return $scope.createPages();
+          });
+          $scope.selectPage = function(page) {
+            $scope.currentPage = page;
+            $scope.createPages();
+            if ($scope.changeUrl === true && $scope.changeUrlOnStart === true) {
+              $location.search($scope.pageQueryName, $scope.currentPage);
             }
+            return $rootScope.$broadcast($scope.paginationEvent, $scope.currentPage);
           };
-        })(this), true);
-      }
+          $scope.createPages = function() {
+            var end, i, k, ref, ref1, results, start, totalPages;
+            $scope.pages = [];
+            start = Math.max(1, $scope.currentPage - Math.abs(Math.floor($scope.displayedPages / 2)));
+            end = start + $scope.displayedPages - 1;
+            totalPages = Math.ceil($scope.itemsCount / $scope.itemsPerPage);
+            if (end > totalPages) {
+              end = totalPages;
+              start = Math.max(1, end - $scope.displayedPages + 1);
+            }
+            if (start > end) {
+              end = start;
+            }
+            results = [];
+            for (i = k = ref = start, ref1 = end; ref <= ref1 ? k <= ref1 : k >= ref1; i = ref <= ref1 ? ++k : --k) {
+              results.push($scope.pages.push(i));
+            }
+            return results;
+          };
+          this.add = function(cell) {
+            return $scope.cells.push(cell);
+          };
+          this.getCollectionName = function() {
+            return $attrs.items;
+          };
+          this.getParentScope = function() {
+            return parentScope;
+          };
+          while (parentScope !== null && !parentScope.hasOwnProperty(this.getCollectionName())) {
+            parentScope = parentScope.$parent;
+          }
+          search = $location.search();
+          if (search[$scope.pageQueryName] != null) {
+            $scope.currentPage = parseInt(search[$scope.pageQueryName]);
+          }
+          if ($scope.itemsCount && $scope.itemsPerPage) {
+            $scope.selectPage($scope.currentPage);
+          }
+          $scope.changeUrlOnStart = true;
+          return parentScope.$watch(this.getCollectionName(), (function(_this) {
+            return function(newRows, oldRows, scope) {
+              if ((scope[_this.getCollectionName()] != null) && $scope.items !== scope[_this.getCollectionName()]) {
+                return $scope.items = scope[_this.getCollectionName()];
+              }
+            };
+          })(this), true);
+        }
+      ]
     };
   }
 ]).directive('coreCol', [
@@ -1429,25 +1443,27 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
       replace: true,
       transclude: true,
       templateUrl: '/angular-core-elements/src/table/details.html',
-      controller: function($scope, $element, $attrs) {
-        var parentScope, results;
-        $scope.rows = [];
-        parentScope = $scope;
-        this.add = function(row) {
-          return $scope.rows.push(row);
-        };
-        this.getCollectionName = function() {
-          return $attrs.item;
-        };
-        this.getParentScope = function() {
-          return parentScope;
-        };
-        results = [];
-        while (parentScope !== null && !parentScope.hasOwnProperty(this.getCollectionName())) {
-          results.push(parentScope = parentScope.$parent);
+      controller: [
+        '$scope', '$element', '$attrs', function($scope, $element, $attrs) {
+          var parentScope, results;
+          $scope.rows = [];
+          parentScope = $scope;
+          this.add = function(row) {
+            return $scope.rows.push(row);
+          };
+          this.getCollectionName = function() {
+            return $attrs.item;
+          };
+          this.getParentScope = function() {
+            return parentScope;
+          };
+          results = [];
+          while (parentScope !== null && !parentScope.hasOwnProperty(this.getCollectionName())) {
+            results.push(parentScope = parentScope.$parent);
+          }
+          return results;
         }
-        return results;
-      }
+      ]
     };
   }
 ]).directive('coreRow', [
@@ -1489,7 +1505,5 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
     };
   }
 ]);
-
-angular.module('ngCoreElementAutocomplete', []).directive('coreAutocomplete', [function() {}]);
 
 })(window.angular);

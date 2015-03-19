@@ -205,7 +205,7 @@ angular
         restrict: 'E'
         replace: true
         templateUrl: '/angular-core-elements/src/datepicker/datepicker.html'
-        controller: ($scope) ->
+        controller: ['$scope', ($scope) ->
             $scope.page = 0
             $scope.isOpen = false
             $scope.value = null
@@ -239,4 +239,5 @@ angular
                 changePicker(new YearsPicker(), $scope)
 
             changePicker(new pickerByType[$scope.type](), $scope) if pickerByType[$scope.type]
+        ]
     ])

@@ -19,7 +19,7 @@ angular
         replace: true
         transclude: true
         templateUrl: '/angular-core-elements/src/panel/panel-header.html'
-        controller: ($scope) ->
+        controller: ['$scope', ($scope) ->
             $scope.search = null
             $scope.queryName = 'search' unless $scope.queryName?
             $scope.changeUrl = true unless $scope.changeUrl?
@@ -48,4 +48,5 @@ angular
 
             search = $location.search()
             $scope.search = search[$scope.queryName] if search[$scope.queryName]?
+        ]
     ])

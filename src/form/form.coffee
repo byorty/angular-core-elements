@@ -14,7 +14,7 @@ angular
         replace: true
         transclude: true
         templateUrl: '/angular-core-elements/src/form/form.html'
-        controller: ($scope) ->
+        controller: ['$scope', ($scope) ->
             throw new Error('service should be defined') unless $scope.service?
             $scope.cleanAfterSend = true unless $scope.cleanAfterSend?
             $scope.successEvent = 'form.success' unless $scope.successEvent?
@@ -62,6 +62,7 @@ angular
                                 "<div class=#{name}>#{error.message}</div>"
                             $scope.error = errors.join('');
                 )
+        ]
         link : ($scope, $element, $attrs, $ctrl) ->
 
             $element.bind('submit', (event)->

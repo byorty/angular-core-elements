@@ -19,7 +19,7 @@ angular
         restrict: 'E'
         replace: true
         templateUrl: '/angular-core-elements/src/dropdown/dropdown.html'
-        controller: ($scope) ->
+        controller: ['$scope', ($scope) ->
             ANY_VALUE = '__ANY__'
             $scope.isOpen = false
             $scope.changeUrl = false unless $scope.changeUrl?
@@ -78,4 +78,5 @@ angular
                 else selectDefault()
 
             updateItems() if hasItems()
+        ]
     ])

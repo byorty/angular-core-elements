@@ -12,6 +12,7 @@ module.exports = function (grunt) {
                 files: {
                     'dist/angular-core-elements.js': [
                         'src/module.coffee',
+                        'src/autocomplete/autocomplete.coffee',
                         'src/button/button.coffee',
                         'src/datepicker/datepicker.coffee',
                         'src/dropdown/dropdown.coffee',
@@ -19,7 +20,6 @@ module.exports = function (grunt) {
                         'src/modal/modal.coffee',
                         'src/panel/panel.coffee',
                         'src/table/table.coffee',
-                        'src/autocomplete/autocomplete.coffee',
                     ]
                 }
             }

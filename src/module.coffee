@@ -2,6 +2,7 @@
 
 angular
     .module('ngCoreElements', [
+        'ngCoreElementAutocomplete',
         'ngCoreElementButton',
         'ngCoreElementDatepicker',
         'ngCoreElementDropdown',
@@ -9,7 +10,6 @@ angular
         'ngCoreElementModal',
         'ngCoreElementPanel',
         'ngCoreElementTable',
-        'ngCoreElementAutocomplete',
     ])
     .factory('$service', [ ->
         class Service

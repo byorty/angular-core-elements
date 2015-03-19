@@ -1,6 +1,6 @@
 angular
     .module('ngCoreElementModal', [])
-    .directive('coreModal', ['$rootScope', ($rootScope) ->
+    .directive('coreModal', [ ->
         scope:
             animation: '@'
             title: '@'
@@ -12,7 +12,7 @@ angular
         replace: true
         transclude: true
         templateUrl: '/angular-core-elements/src/modal/modal.html'
-        controller: ($scope) ->
+        controller: ['$scope', ($scope) ->
             $scope.animation = 'fade' unless $scope.animation?
             $scope.autoOpen = false unless $scope.autoOpen?
             $scope.isOpen = if $scope.autoOpen is true then true else false
@@ -22,6 +22,7 @@ angular
             $scope.close = @hide = -> $scope.isOpen = false
 
             angular
-            .element(document.querySelector($scope.opener))
-            .bind($scope.openerEvent, -> $scope.open()) if $scope.opener? and $scope.opener.length
+                .element(document.querySelector($scope.opener))
+                .bind($scope.openerEvent, -> $scope.open()) if $scope.opener? and $scope.opener.length
+        ]
     ])
