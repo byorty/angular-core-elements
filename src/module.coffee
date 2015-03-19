@@ -9,6 +9,7 @@ angular
         'ngCoreElementModal',
         'ngCoreElementPanel',
         'ngCoreElementTable',
+        'ngCoreElementAutocomplete',
     ])
     .factory('$service', [ ->
         class Service

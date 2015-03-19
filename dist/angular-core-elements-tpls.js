@@ -2,6 +2,11 @@
 angular.module('ngCoreElements').run(['$templateCache', function($templateCache) {
   'use strict';
 
+  $templateCache.put('/angular-core-elements/src/autocomplete/autocomplete.html',
+    ""
+  );
+
+
   $templateCache.put('/angular-core-elements/src/button/button.html',
     "<button type=\"button\" class=\"btn\">\n" +
     "    <span ng-if=\"icon\" class=\"{{icon}}\" aria-hidden=\"true\"></span>\n" +
