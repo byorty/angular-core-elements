@@ -44,7 +44,7 @@ angular
                         )
             )
 
-            $scope.onSearch = (search) -> $scope.search = search
+            $scope.onChange = (search) -> $scope.search = search
 
             search = $location.search()
             $scope.search = search[$scope.queryName] if search[$scope.queryName]?

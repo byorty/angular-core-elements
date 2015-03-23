@@ -265,7 +265,86 @@ Date.replaceCharsLocale = {
   }
 };
 
-angular.module('ngCoreElementAutocomplete', []).directive('coreAutocomplete', [function() {}]);
+angular.module('ngCoreElementAutocomplete', []).directive('coreAutocomplete', [
+  '$service', '$timeout', '$location', function($service, $timeout, $location) {
+    return {
+      scope: {
+        service: '@',
+        params: '=?',
+        changeUrl: '=?',
+        queryName: '@',
+        paramName: '@',
+        label: '@',
+        lblClass: '@',
+        wrpClass: '@',
+        placeholder: '@',
+        delay: '=?'
+      },
+      restrict: 'E',
+      replace: true,
+      templateUrl: '/angular-core-elements/src/autocomplete/autocomplete.html',
+      controller: [
+        '$scope', function($scope) {
+          var isSelect, promise;
+          if ($scope.service == null) {
+            throw new Error('service should be defined');
+          }
+          if ($scope.params == null) {
+            $scope.params = {};
+          }
+          if ($scope.changeUrl == null) {
+            $scope.changeUrl = false;
+          }
+          if ($scope.queryName == null) {
+            $scope.queryName = 'query';
+          }
+          if ($scope.paramName == null) {
+            $scope.paramName = 'query';
+          }
+          if ($scope.delay == null) {
+            $scope.delay = 1000;
+          }
+          $scope.isOpen = false;
+          $scope.search = null;
+          $scope.items = null;
+          isSelect = false;
+          promise = null;
+          $scope.$watch('search', function() {
+            if (isSelect) {
+              return isSelect = false;
+            } else {
+              if ($scope.search != null) {
+                if (promise != null) {
+                  $timeout.cancel(promise);
+                }
+                return promise = $timeout(function() {
+                  $scope.params[$scope.paramName] = $scope.search;
+                  return $service.getByPath($scope.service)($scope.params, function(resp) {
+                    if (resp.success && resp.items && resp.items.length) {
+                      $scope.items = resp.items;
+                    }
+                    return $scope.isOpen = true;
+                  });
+                }, $scope.delay);
+              }
+            }
+          });
+          $scope.onSearch = function(search) {
+            return $scope.search = search;
+          };
+          return $scope.onSelect = function(item) {
+            isSelect = true;
+            $scope.isOpen = false;
+            $scope.search = item.name;
+            if ($scope.changeUrl) {
+              return $location.search($scope.queryName, item.id);
+            }
+          };
+        }
+      ]
+    };
+  }
+]);
 
 angular.module('ngCoreElementButton', []).directive('coreButton', [
   function() {
@@ -1275,7 +1354,7 @@ angular.module('ngCoreElementPanel', []).directive('corePanel', [
               }, $scope.delay);
             }
           });
-          $scope.onSearch = function(search) {
+          $scope.onChange = function(search) {
             return $scope.search = search;
           };
           search = $location.search();
