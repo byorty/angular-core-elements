@@ -21,6 +21,21 @@ angular.module('ngCoreElements', ['ngCoreElementAutocomplete', 'ngCoreElementBut
 
     })();
   }
+]).directive('body', [
+  '$rootScope', '$timeout', function($rootScope, $timeout) {
+    return {
+      restrict: 'E',
+      link: function($scope, $element) {
+        return $element.bind('click', function(event) {
+          return $timeout(function() {
+            return $rootScope.$broadcast('body.click', {
+              target: event.target
+            });
+          });
+        });
+      }
+    };
+  }
 ]);
 
 Date.prototype.format = function(format) {
@@ -266,7 +281,7 @@ Date.replaceCharsLocale = {
 };
 
 angular.module('ngCoreElementAutocomplete', []).directive('coreAutocomplete', [
-  '$service', '$timeout', '$location', function($service, $timeout, $location) {
+  '$service', '$timeout', '$location', 'ngCoreAutocomplete', function($service, $timeout, $location, ngCoreAutocomplete) {
     return {
       scope: {
         service: '@',
@@ -274,6 +289,7 @@ angular.module('ngCoreElementAutocomplete', []).directive('coreAutocomplete', [
         changeUrl: '=?',
         queryName: '@',
         paramName: '@',
+        value: '=?',
         label: '@',
         lblClass: '@',
         wrpClass: '@',
@@ -284,28 +300,27 @@ angular.module('ngCoreElementAutocomplete', []).directive('coreAutocomplete', [
       replace: true,
       templateUrl: '/angular-core-elements/src/autocomplete/autocomplete.html',
       controller: [
-        '$scope', function($scope) {
+        '$scope', '$element', function($scope, $element) {
           var isSelect, promise;
           if ($scope.service == null) {
             throw new Error('service should be defined');
           }
           if ($scope.params == null) {
-            $scope.params = {};
+            $scope.params = ngCoreAutocomplete.params;
           }
           if ($scope.changeUrl == null) {
-            $scope.changeUrl = false;
+            $scope.changeUrl = ngCoreAutocomplete.changeUrl;
           }
           if ($scope.queryName == null) {
-            $scope.queryName = 'query';
+            $scope.queryName = ngCoreAutocomplete.queryName;
           }
           if ($scope.paramName == null) {
-            $scope.paramName = 'query';
+            $scope.paramName = ngCoreAutocomplete.paramName;
           }
           if ($scope.delay == null) {
-            $scope.delay = 1000;
+            $scope.delay = ngCoreAutocomplete.delay;
           }
           $scope.isOpen = false;
-          $scope.search = null;
           $scope.items = null;
           isSelect = false;
           promise = null;
@@ -318,15 +333,32 @@ angular.module('ngCoreElementAutocomplete', []).directive('coreAutocomplete', [
                   $timeout.cancel(promise);
                 }
                 return promise = $timeout(function() {
-                  $scope.params[$scope.paramName] = $scope.search;
-                  return $service.getByPath($scope.service)($scope.params, function(resp) {
-                    if (resp.success && resp.items && resp.items.length) {
-                      $scope.items = resp.items;
+                  var ref;
+                  if ((ref = $scope.search) != null ? ref.length : void 0) {
+                    $scope.params[$scope.paramName] = $scope.search;
+                    return $service.getByPath($scope.service)($scope.params, function(resp) {
+                      if (resp.success && resp.items && resp.items.length) {
+                        $scope.items = resp.items;
+                      }
+                      return $scope.isOpen = true;
+                    });
+                  } else {
+                    $scope.isOpen = false;
+                    if ($scope.changeUrl) {
+                      return $location.search($scope.queryName, null);
                     }
-                    return $scope.isOpen = true;
-                  });
+                  }
                 }, $scope.delay);
               }
+            }
+          });
+          $scope.$watch('value', function() {
+            isSelect = true;
+            return $scope.search = $scope.value;
+          });
+          $scope.$on('body.click', function(event, args) {
+            if ($scope.isOpen && !$element[0].contains(args.target)) {
+              return $scope.isOpen = false;
             }
           });
           $scope.onSearch = function(search) {
@@ -344,7 +376,24 @@ angular.module('ngCoreElementAutocomplete', []).directive('coreAutocomplete', [
       ]
     };
   }
-]);
+]).provider('ngCoreAutocomplete', function() {
+  this.params = {};
+  this.changeUrl = false;
+  this.queryName = 'query';
+  this.paramName = 'query';
+  this.delay = 1000;
+  this.$get = (function(_this) {
+    return function() {
+      return {
+        params: _this.params,
+        changeUrl: _this.changeUrl,
+        queryName: _this.queryName,
+        paramName: _this.paramName,
+        delay: _this.delay
+      };
+    };
+  })(this);
+});
 
 angular.module('ngCoreElementButton', []).directive('coreButton', [
   function() {
@@ -361,7 +410,7 @@ angular.module('ngCoreElementButton', []).directive('coreButton', [
 ]);
 
 angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
-  '$location', function($location) {
+  '$location', 'ngCoreDatepicker', function($location, ngCoreDatepicker) {
     var AbstractPicker, DaysPicker, MonthsPicker, YearsPicker, changePicker, pickerByType;
     changePicker = function(newPicker, scope) {
       scope.picker = newPicker;
@@ -685,41 +734,41 @@ angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
       replace: true,
       templateUrl: '/angular-core-elements/src/datepicker/datepicker.html',
       controller: [
-        '$scope', function($scope) {
+        '$scope', '$element', function($scope, $element) {
           var search;
           $scope.page = 0;
           $scope.isOpen = false;
           $scope.value = null;
           $scope.now = new Date();
           if ($scope.type == null) {
-            $scope.type = 'day';
+            $scope.type = ngCoreDatepicker.type;
           }
           if ($scope.startDay == null) {
-            $scope.startDay = 1;
+            $scope.startDay = ngCoreDatepicker.startDay;
           }
           if ($scope.changeUrl == null) {
-            $scope.changeUrl = false;
+            $scope.changeUrl = ngCoreDatepicker.changeUrl;
           }
           if ($scope.changeUrlOnStart == null) {
-            $scope.changeUrlOnStart = false;
+            $scope.changeUrlOnStart = ngCoreDatepicker.changeUrlOnStart;
           }
           if ($scope.queryName == null) {
-            $scope.queryName = 'datepicker';
+            $scope.queryName = ngCoreDatepicker.queryName;
           }
           if ($scope.headerMonthFormat == null) {
-            $scope.headerMonthFormat = 'F';
+            $scope.headerMonthFormat = ngCoreDatepicker.headerMonthFormat;
           }
           if ($scope.headerYearFormat == null) {
-            $scope.headerYearFormat = 'Y';
+            $scope.headerYearFormat = ngCoreDatepicker.headerYearFormat;
           }
           if ($scope.iconLeft == null) {
-            $scope.iconLeft = 'glyphicon glyphicon-chevron-left';
+            $scope.iconLeft = ngCoreDatepicker.iconLeft;
           }
           if ($scope.iconRight == null) {
-            $scope.iconRight = 'glyphicon glyphicon-chevron-right';
+            $scope.iconRight = ngCoreDatepicker.iconRight;
           }
           if ($scope.format == null) {
-            $scope.format = 'Y-m-d';
+            $scope.format = ngCoreDatepicker.format;
           }
           if ($scope.current != null) {
             $scope.current = typeof $scope.current === 'string' ? new Date($scope.current) : void 0;
@@ -743,6 +792,11 @@ angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
             $scope.page = 0;
             return changePicker(new YearsPicker(), $scope);
           };
+          $scope.$on('body.click', function(event, args) {
+            if ($scope.isOpen && !$element[0].contains(args.target)) {
+              return $scope.isOpen = false;
+            }
+          });
           if (pickerByType[$scope.type]) {
             return changePicker(new pickerByType[$scope.type](), $scope);
           }
@@ -750,10 +804,37 @@ angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
       ]
     };
   }
-]);
+]).provider('ngCoreDatepicker', function() {
+  this.type = 'day';
+  this.startDay = 1;
+  this.changeUrl = false;
+  this.changeUrlOnStart = false;
+  this.queryName = 'datepicker';
+  this.headerMonthFormat = 'F';
+  this.headerYearFormat = 'Y';
+  this.iconLeft = 'glyphicon glyphicon-chevron-left';
+  this.iconRight = 'glyphicon glyphicon-chevron-right';
+  this.format = 'Y-m-d';
+  this.$get = (function(_this) {
+    return function() {
+      return {
+        type: _this.type,
+        startDay: _this.startDay,
+        changeUrl: _this.changeUrl,
+        changeUrlOnStart: _this.changeUrlOnStart,
+        queryName: _this.queryName,
+        headerMonthFormat: _this.headerMonthFormat,
+        headerYearFormat: _this.headerYearFormat,
+        iconLeft: _this.iconLeft,
+        iconRight: _this.iconRight,
+        format: _this.format
+      };
+    };
+  })(this);
+});
 
 angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
-  '$location', '$rootScope', '$timeout', function($location, $rootScope, $timeout) {
+  '$location', '$rootScope', '$timeout', 'ngCoreDropdown', function($location, $rootScope, $timeout, ngCoreDropdown) {
     return {
       scope: {
         items: '=',
@@ -775,30 +856,30 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
       replace: true,
       templateUrl: '/angular-core-elements/src/dropdown/dropdown.html',
       controller: [
-        '$scope', function($scope) {
+        '$scope', '$element', function($scope, $element) {
           var ANY_VALUE, hasItems, selectDefault, updateItems;
           ANY_VALUE = '__ANY__';
           $scope.isOpen = false;
           if ($scope.changeUrl == null) {
-            $scope.changeUrl = false;
+            $scope.changeUrl = ngCoreDropdown.changeUrl;
           }
           if ($scope.changeUrlOnStart == null) {
-            $scope.changeUrlOnStart = false;
+            $scope.changeUrlOnStart = ngCoreDropdown.changeUrlOnStart;
           }
           if ($scope.queryName == null) {
-            $scope.queryName = 'dropdown';
+            $scope.queryName = ngCoreDropdown.queryName;
           }
           if ($scope.selectEvent == null) {
-            $scope.selectEvent = 'dropdown.select';
+            $scope.selectEvent = ngCoreDropdown.selectEvent;
           }
           if ($scope.hasAny == null) {
-            $scope.hasAny = false;
+            $scope.hasAny = ngCoreDropdown.hasAny;
           }
           if ($scope.anyName == null) {
-            $scope.anyName = 'Любой';
+            $scope.anyName = ngCoreDropdown.anyName;
           }
           if ($scope.align == null) {
-            $scope.align = 'left';
+            $scope.align = ngCoreDropdown.align;
           }
           $scope.open = function() {
             return $scope.isOpen = $scope.isOpen ? false : true;
@@ -838,6 +919,11 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
               return $scope.select($scope.selected);
             }
           });
+          $scope.$on('body.click', function(event, args) {
+            if ($scope.isOpen && !$element[0].contains(args.target)) {
+              return $scope.isOpen = false;
+            }
+          });
           hasItems = function() {
             return $scope.items != null;
           };
@@ -875,10 +961,31 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
       ]
     };
   }
-]);
+]).provider('ngCoreDropdown', function() {
+  this.changeUrl = false;
+  this.changeUrlOnStart = false;
+  this.queryName = 'dropdown';
+  this.selectEvent = 'dropdown.select';
+  this.hasAny = false;
+  this.anyName = 'Любой';
+  this.align = 'left';
+  this.$get = (function(_this) {
+    return function() {
+      return {
+        changeUrl: _this.changeUrl,
+        changeUrlOnStart: _this.changeUrlOnStart,
+        queryName: _this.queryName,
+        selectEvent: _this.selectEvent,
+        hasAny: _this.hasAny,
+        anyName: _this.anyName,
+        align: _this.align
+      };
+    };
+  })(this);
+});
 
 angular.module('ngCoreElementForm', []).directive('coreForm', [
-  '$window', '$service', function($window, $service) {
+  '$window', '$service', 'ngCoreForm', function($window, $service, ngCoreForm) {
     return {
       scope: {
         service: '@',
@@ -901,21 +1008,21 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
             throw new Error('service should be defined');
           }
           if ($scope.cleanAfterSend == null) {
-            $scope.cleanAfterSend = true;
+            $scope.cleanAfterSend = ngCoreForm.cleanAfterSend;
           }
           if ($scope.successEvent == null) {
-            $scope.successEvent = 'form.success';
+            $scope.successEvent = ngCoreForm.successEvent;
           }
           if ($scope.sendEvent == null) {
-            $scope.sendEvent = 'form.send';
+            $scope.sendEvent = ngCoreForm.sendEvent;
           }
           if ($scope.receiveEvent == null) {
-            $scope.receiveEvent = 'form.receive';
+            $scope.receiveEvent = ngCoreForm.receiveEvent;
           }
           if ($scope.errorEvent == null) {
-            $scope.errorEvent = 'form.error';
+            $scope.errorEvent = ngCoreForm.errorEvent;
           }
-          $scope.cleanAfterSendEvent = 'form.clean';
+          $scope.cleanAfterSendEvent = ngCoreForm.cleanAfterSendEvent;
           $scope.error = null;
           listeners = {};
           listeners[$scope.successEvent] = {};
@@ -1003,7 +1110,26 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       }
     };
   }
-]).directive('coreInput', [
+]).provider('ngCoreForm', function() {
+  this.cleanAfterSend = true;
+  this.successEvent = 'form.success';
+  this.sendEvent = 'form.send';
+  this.receiveEvent = 'form.receive';
+  this.errorEvent = 'form.error';
+  this.cleanAfterSendEvent = 'form.clean';
+  this.$get = (function(_this) {
+    return function() {
+      return {
+        cleanAfterSend: _this.cleanAfterSend,
+        successEvent: _this.successEvent,
+        sendEvent: _this.sendEvent,
+        receiveEvent: _this.receiveEvent,
+        errorEvent: _this.errorEvent,
+        cleanAfterSendEvent: _this.cleanAfterSendEvent
+      };
+    };
+  })(this);
+}).directive('coreInput', [
   function() {
     return {
       scope: {
@@ -1083,7 +1209,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
     };
   }
 ]).directive('coreSubmit', [
-  function() {
+  'ngCoreSubmit', function(ngCoreSubmit) {
     return {
       scope: {
         btnClass: '@',
@@ -1103,7 +1229,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       link: function($scope, $element, $attrs, $ctrl) {
         var btn;
         if ($scope.btnClass == null) {
-          $scope.btnClass = 'btn-success';
+          $scope.btnClass = ngCoreSubmit.btnClass;
         }
         btn = angular.element($element[0].querySelector('button'));
         $ctrl.addListener($ctrl.getSendEvent(), 'submit', function() {
@@ -1115,7 +1241,16 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       }
     };
   }
-]).directive('coreSelect', [
+]).provider('ngCoreSubmit', function() {
+  var btnClass;
+  btnClass = 'btn-success';
+  this.$get = function() {
+    return {
+      btnClass: btnClass
+    };
+  };
+  return this;
+}).directive('coreSelect', [
   function() {
     return {
       scope: {

@@ -19,6 +19,19 @@ angular
                 injector = angular.element(document).injector()
                 injector.get(serviceParts[0])[method]
     ])
+    .directive('body', ['$rootScope', '$timeout', ($rootScope, $timeout) ->
+        restrict: 'E'
+        link: ($scope, $element) ->
+            $element.bind('click', (event) ->
+                $timeout(
+                    ->
+                        $rootScope.$broadcast(
+                            'body.click',
+                            target: event.target
+                        )
+                )
+            )
+    ])
 
 Date.prototype.format = (format) ->
     returnStr = '';

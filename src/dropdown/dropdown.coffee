@@ -1,6 +1,6 @@
 angular
     .module('ngCoreElementDropdown', [])
-    .directive('coreDropdown', ['$location', '$rootScope', '$timeout', ($location, $rootScope, $timeout) ->
+    .directive('coreDropdown', ['$location', '$rootScope', '$timeout', 'ngCoreDropdown', ($location, $rootScope, $timeout, ngCoreDropdown) ->
         scope:
             items: '='
             selected: '=?'
@@ -19,16 +19,16 @@ angular
         restrict: 'E'
         replace: true
         templateUrl: '/angular-core-elements/src/dropdown/dropdown.html'
-        controller: ['$scope', ($scope) ->
+        controller: ['$scope', '$element', ($scope, $element) ->
             ANY_VALUE = '__ANY__'
             $scope.isOpen = false
-            $scope.changeUrl = false unless $scope.changeUrl?
-            $scope.changeUrlOnStart = false unless $scope.changeUrlOnStart?
-            $scope.queryName = 'dropdown' unless $scope.queryName?
-            $scope.selectEvent = 'dropdown.select' unless $scope.selectEvent?
-            $scope.hasAny = false unless $scope.hasAny?
-            $scope.anyName = 'Любой' unless $scope.anyName?
-            $scope.align = 'left' unless $scope.align?
+            $scope.changeUrl = ngCoreDropdown.changeUrl unless $scope.changeUrl?
+            $scope.changeUrlOnStart = ngCoreDropdown.changeUrlOnStart unless $scope.changeUrlOnStart?
+            $scope.queryName = ngCoreDropdown.queryName unless $scope.queryName?
+            $scope.selectEvent = ngCoreDropdown.selectEvent unless $scope.selectEvent?
+            $scope.hasAny = ngCoreDropdown.hasAny unless $scope.hasAny?
+            $scope.anyName = ngCoreDropdown.anyName unless $scope.anyName?
+            $scope.align = ngCoreDropdown.align unless $scope.align?
 
             $scope.open = ->
                 $scope.isOpen = if $scope.isOpen then false else true
@@ -52,6 +52,14 @@ angular
             $scope.$watch(
                 'selected'
                 (newSelected, oldSelected) -> $scope.select($scope.selected) if newSelected isnt oldSelected and $scope.selected
+            )
+
+            $scope.$on(
+                'body.click',
+                (event, args) ->
+                    if $scope.isOpen and !$element[0].contains(args.target)
+                        $scope.isOpen = false
+
             )
 
             hasItems = -> $scope.items?
@@ -80,3 +88,21 @@ angular
             updateItems() if hasItems()
         ]
     ])
+    .provider('ngCoreDropdown', ->
+        @changeUrl = false
+        @changeUrlOnStart = false
+        @queryName = 'dropdown'
+        @selectEvent = 'dropdown.select'
+        @hasAny = false
+        @anyName = 'Любой'
+        @align = 'left'
+        @$get = =>
+            changeUrl: @changeUrl
+            changeUrlOnStart: @changeUrlOnStart
+            queryName: @queryName
+            selectEvent: @selectEvent
+            hasAny: @hasAny
+            anyName: @anyName
+            align: @align
+        return
+    )

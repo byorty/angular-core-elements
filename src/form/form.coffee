@@ -1,6 +1,6 @@
 angular
     .module('ngCoreElementForm', [])
-    .directive('coreForm', ['$window', '$service', ($window, $service) ->
+    .directive('coreForm', ['$window', '$service', 'ngCoreForm', ($window, $service, ngCoreForm) ->
         scope:
             service: '@'
             cleanAfterSend: '=?'
@@ -16,12 +16,12 @@ angular
         templateUrl: '/angular-core-elements/src/form/form.html'
         controller: ['$scope', ($scope) ->
             throw new Error('service should be defined') unless $scope.service?
-            $scope.cleanAfterSend = true unless $scope.cleanAfterSend?
-            $scope.successEvent = 'form.success' unless $scope.successEvent?
-            $scope.sendEvent = 'form.send' unless $scope.sendEvent?
-            $scope.receiveEvent = 'form.receive' unless $scope.receiveEvent?
-            $scope.errorEvent = 'form.error' unless $scope.errorEvent?
-            $scope.cleanAfterSendEvent = 'form.clean'
+            $scope.cleanAfterSend = ngCoreForm.cleanAfterSend unless $scope.cleanAfterSend?
+            $scope.successEvent = ngCoreForm.successEvent unless $scope.successEvent?
+            $scope.sendEvent = ngCoreForm.sendEvent unless $scope.sendEvent?
+            $scope.receiveEvent = ngCoreForm.receiveEvent unless $scope.receiveEvent?
+            $scope.errorEvent = ngCoreForm.errorEvent unless $scope.errorEvent?
+            $scope.cleanAfterSendEvent = ngCoreForm.cleanAfterSendEvent
             $scope.error = null
             listeners = {}
             listeners[$scope.successEvent] = {}
@@ -70,6 +70,22 @@ angular
                 $ctrl.send()
             )
     ])
+    .provider('ngCoreForm', ->
+        @cleanAfterSend = true
+        @successEvent = 'form.success'
+        @sendEvent = 'form.send'
+        @receiveEvent = 'form.receive'
+        @errorEvent = 'form.error'
+        @cleanAfterSendEvent = 'form.clean'
+        @$get = =>
+            cleanAfterSend: @cleanAfterSend
+            successEvent: @successEvent
+            sendEvent: @sendEvent
+            receiveEvent: @receiveEvent
+            errorEvent: @errorEvent
+            cleanAfterSendEvent: @cleanAfterSendEvent
+        return
+    )
     .directive('coreInput', [ ->
         scope:
             type: '@'
@@ -131,7 +147,7 @@ angular
                 (params) -> params[$scope.name] = $scope.value if $scope.value
             )
     ])
-    .directive('coreSubmit', [ ->
+    .directive('coreSubmit', ['ngCoreSubmit', (ngCoreSubmit) ->
         scope:
             btnClass: '@'
             wrpClass: '@'
@@ -144,7 +160,7 @@ angular
                 '/angular-core-elements/src/form/wrapped-submit.html'
             else '/angular-core-elements/src/form/submit.html'
         link: ($scope, $element, $attrs, $ctrl) ->
-            $scope.btnClass = 'btn-success' unless $scope.btnClass?
+            $scope.btnClass = ngCoreSubmit.btnClass unless $scope.btnClass?
 
             btn = angular.element($element[0].querySelector('button'))
 
@@ -160,6 +176,12 @@ angular
                 -> btn.removeClass('disabled')[0].blur()
             )
     ])
+    .provider('ngCoreSubmit', ->
+        btnClass = 'btn-success'
+        @$get = ->
+            btnClass: btnClass
+        @
+    )
     .directive('coreSelect', [ ->
         scope:
             name: '@'

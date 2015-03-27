@@ -1,6 +1,6 @@
 angular
     .module('ngCoreElementDatepicker', [])
-    .directive('coreDatepicker', ['$location', ($location) ->
+    .directive('coreDatepicker', ['$location', 'ngCoreDatepicker', ($location, ngCoreDatepicker) ->
         changePicker = (newPicker, scope) ->
             scope.picker = newPicker
             scope.picker.setScope(scope)
@@ -205,21 +205,21 @@ angular
         restrict: 'E'
         replace: true
         templateUrl: '/angular-core-elements/src/datepicker/datepicker.html'
-        controller: ['$scope', ($scope) ->
+        controller: ['$scope', '$element', ($scope, $element) ->
             $scope.page = 0
             $scope.isOpen = false
             $scope.value = null
             $scope.now = new Date()
-            $scope.type = 'day' unless $scope.type?
-            $scope.startDay = 1 unless $scope.startDay?
-            $scope.changeUrl = false unless $scope.changeUrl?
-            $scope.changeUrlOnStart = false unless $scope.changeUrlOnStart?
-            $scope.queryName = 'datepicker' unless $scope.queryName?
-            $scope.headerMonthFormat = 'F' unless $scope.headerMonthFormat?
-            $scope.headerYearFormat = 'Y' unless $scope.headerYearFormat?
-            $scope.iconLeft = 'glyphicon glyphicon-chevron-left' unless $scope.iconLeft?
-            $scope.iconRight = 'glyphicon glyphicon-chevron-right' unless $scope.iconRight?
-            $scope.format = 'Y-m-d' unless $scope.format?
+            $scope.type = ngCoreDatepicker.type unless $scope.type?
+            $scope.startDay = ngCoreDatepicker.startDay unless $scope.startDay?
+            $scope.changeUrl = ngCoreDatepicker.changeUrl unless $scope.changeUrl?
+            $scope.changeUrlOnStart = ngCoreDatepicker.changeUrlOnStart unless $scope.changeUrlOnStart?
+            $scope.queryName = ngCoreDatepicker.queryName unless $scope.queryName?
+            $scope.headerMonthFormat = ngCoreDatepicker.headerMonthFormat unless $scope.headerMonthFormat?
+            $scope.headerYearFormat = ngCoreDatepicker.headerYearFormat unless $scope.headerYearFormat?
+            $scope.iconLeft = ngCoreDatepicker.iconLeft unless $scope.iconLeft?
+            $scope.iconRight = ngCoreDatepicker.iconRight unless $scope.iconRight?
+            $scope.format = ngCoreDatepicker.format unless $scope.format?
 
             if $scope.current?
                 $scope.current = if typeof($scope.current) is 'string' then new Date($scope.current)
@@ -238,6 +238,38 @@ angular
                 $scope.page = 0
                 changePicker(new YearsPicker(), $scope)
 
+            $scope.$on(
+                'body.click',
+                (event, args) ->
+                    if $scope.isOpen and !$element[0].contains(args.target)
+                        $scope.isOpen = false
+
+            )
+
             changePicker(new pickerByType[$scope.type](), $scope) if pickerByType[$scope.type]
         ]
     ])
+    .provider('ngCoreDatepicker', ->
+        @type = 'day'
+        @startDay = 1
+        @changeUrl = false
+        @changeUrlOnStart = false
+        @queryName = 'datepicker'
+        @headerMonthFormat = 'F'
+        @headerYearFormat = 'Y'
+        @iconLeft = 'glyphicon glyphicon-chevron-left'
+        @iconRight = 'glyphicon glyphicon-chevron-right'
+        @format = 'Y-m-d'
+        @$get = =>
+            type: @type
+            startDay: @startDay
+            changeUrl: @changeUrl
+            changeUrlOnStart: @changeUrlOnStart
+            queryName: @queryName
+            headerMonthFormat: @headerMonthFormat
+            headerYearFormat: @headerYearFormat
+            iconLeft: @iconLeft
+            iconRight: @iconRight
+            format: @format
+        return
+    )
