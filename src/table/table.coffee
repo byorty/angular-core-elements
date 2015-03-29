@@ -121,11 +121,14 @@ angular
         scope:
             name: '@'
             class: '@'
+            lblClass: '@'
+            wrpClass: '@'
         restrict: 'E'
         require: '^coreDetails'
         compile: ($element, $attrs) ->
             content = $element.html()
             ($scope, $element, $attrs, $ctrl) ->
+                $scope.lblClass = 'col-sm-2' unless $scope.lblClass?
                 $scope.content = content
                 $ctrl.add($scope)
     ])

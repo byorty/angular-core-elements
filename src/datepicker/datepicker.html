@@ -3,18 +3,18 @@
     <div class="datepicker-group">
         <input type="text"
                class="form-control"
-               ng-click="open()"
+               ng-click="event.preventDefault();open()"
                value="{{value}}"/>
         <div class="datepicker-popover" ng-show="isOpen">
             <div class="datepicker-btns">
-                <core-button ng-click="picker.prev()"
+                <core-button ng-click="event.preventDefault();picker.prev()"
                              ng-show="picker.isShowPageButtons()"
                              icon="{{iconLeft}}"></core-button>
                 <div class="datepicker-header">
-                    <core-button ng-click="selectMonth()">{{picker.getHeaderMonth()}}</core-button>
-                    <core-button ng-click="selectYear()">{{picker.getHeaderYear()}}</core-button>
+                    <core-button ng-click="event.preventDefault();selectMonth()">{{picker.getHeaderMonth()}}</core-button>
+                    <core-button ng-click="event.preventDefault();selectYear()">{{picker.getHeaderYear()}}</core-button>
                 </div>
-                <core-button ng-click="picker.next()"
+                <core-button ng-click="event.preventDefault();picker.next()"
                              ng-show="picker.isShowPageButtons()"
                              icon="{{iconRight}}"></core-button>
             </div>
@@ -27,7 +27,7 @@
                 <tbody>
                     <tr ng-repeat="row in rows">
                         <td ng-repeat="cell in row.cells">
-                            <core-button ng-click="picker.select(cell)"
+                            <core-button ng-click="event.preventDefault();picker.select(cell)"
                                          ng-class="picker.getItemClasses(cell)">{{cell.name}}</core-button>
                         </td>
                     </tr>

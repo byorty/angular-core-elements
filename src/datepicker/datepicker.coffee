@@ -1,7 +1,8 @@
 angular
     .module('ngCoreElementDatepicker', [])
-    .directive('coreDatepicker', ['$location', 'ngCoreDatepicker', ($location, ngCoreDatepicker) ->
+    .directive('coreDatepicker', ['$location', 'ngCoreDatepicker', '$timeout', ($location, ngCoreDatepicker, $timeout) ->
         changePicker = (newPicker, scope) ->
+            scope.changeView = true
             scope.picker = newPicker
             scope.picker.setScope(scope)
             scope.picker.build()
@@ -88,34 +89,29 @@ angular
             isSelected: (item) -> @scope.current.getMonth() is item.month
             isCurrent: (item) -> @scope.now.getMonth() is item.month
             select: (item) ->
-                @scope.page = item.month - @scope.now.getMonth()
+                @scope.page = item.month + ((item.year - @scope.now.getFullYear()) * 12) - @scope.now.getMonth()
                 changePicker(new DaysPicker(), @scope)
 
         class DaysPicker extends AbstractPicker
             build: ->
-                @scope.current.setMonth(@scope.now.getMonth() + @scope.page)
+                @scope.current = new Date(
+                    @scope.now.getFullYear()
+                    @scope.now.getMonth() + @scope.page
+                    @scope.now.getDate()
+                )
+
                 items = []
                 prevDateObj = new DateObject(@scope.current, -1)
                 currentDateObj = new DateObject(@scope.current)
                 nextDateObj = new DateObject(@scope.current, 1)
 
                 if currentDateObj.firstDayMonth isnt @scope.startDay
-                    if prevDateObj.lastDayMonth == 0
+                    for day in [@scope.startDay..prevDateObj.lastDayMonth]
                         items.push(@createItem(
                             prevDateObj.date.getFullYear()
                             prevDateObj.date.getMonth()
-                            prevDateObj.date.daysCount
+                            prevDateObj.daysCount - prevDateObj.lastDayMonth + day
                         ))
-                    else
-                        for day in [1..prevDateObj.lastDayMonth]
-                            prevDateObj.date.setDate(
-                                prevDateObj.daysCount - prevDateObj.lastDayMonth + day
-                            )
-                            items.push(@createItem(
-                                prevDateObj.date.getFullYear()
-                                prevDateObj.date.getMonth()
-                                prevDateObj.date.getDate()
-                            ))
 
                 for day in [1..currentDateObj.daysCount]
                     items.push(@createItem(
@@ -178,7 +174,7 @@ angular
 
             class DateObject
                 constructor: (@date, diff = 0) ->
-                    @date = new Date(@date.getFullYear(), @date.getMonth() + diff, @date.getDate())
+                    @date = new Date(@date.getFullYear(), @date.getMonth() + diff, 1)
                     @daysCount = new Date(@date.getFullYear(), @date.getMonth() + 1, 0).getDate()
                     @firstDayMonth = new Date(@date.getFullYear(), @date.getMonth(), 1).getDay()
                     @lastDayMonth = new Date(@date.getFullYear(), @date.getMonth(), @daysCount).getDay()
@@ -209,6 +205,7 @@ angular
             $scope.page = 0
             $scope.isOpen = false
             $scope.value = null
+            $scope.changeView = false
             $scope.now = new Date()
             $scope.type = ngCoreDatepicker.type unless $scope.type?
             $scope.startDay = ngCoreDatepicker.startDay unless $scope.startDay?
@@ -241,9 +238,10 @@ angular
             $scope.$on(
                 'body.click',
                 (event, args) ->
-                    if $scope.isOpen and !$element[0].contains(args.target)
+                    if $scope.changeView
+                        $scope.changeView = false
+                    else if $scope.isOpen && !$scope.changeView and !$element[0].contains(args.target)
                         $scope.isOpen = false
-
             )
 
             changePicker(new pickerByType[$scope.type](), $scope) if pickerByType[$scope.type]

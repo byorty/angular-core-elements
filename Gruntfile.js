@@ -29,7 +29,7 @@ module.exports = function (grunt) {
                 options: {
                     prefix: '/angular-core-elements'
                 },
-                src: 'src/**/*.html',
+                src: 'src/*/*.html',
                 dest: 'dist/angular-core-elements-tpls.js'
             }
         },

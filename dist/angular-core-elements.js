@@ -410,9 +410,10 @@ angular.module('ngCoreElementButton', []).directive('coreButton', [
 ]);
 
 angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
-  '$location', 'ngCoreDatepicker', function($location, ngCoreDatepicker) {
+  '$location', 'ngCoreDatepicker', '$timeout', function($location, ngCoreDatepicker, $timeout) {
     var AbstractPicker, DaysPicker, MonthsPicker, YearsPicker, changePicker, pickerByType;
     changePicker = function(newPicker, scope) {
+      scope.changeView = true;
       scope.picker = newPicker;
       scope.picker.setScope(scope);
       return scope.picker.build();
@@ -587,7 +588,7 @@ angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
       };
 
       MonthsPicker.prototype.select = function(item) {
-        this.scope.page = item.month - this.scope.now.getMonth();
+        this.scope.page = item.month + ((item.year - this.scope.now.getFullYear()) * 12) - this.scope.now.getMonth();
         return changePicker(new DaysPicker(), this.scope);
       };
 
@@ -604,32 +605,27 @@ angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
       }
 
       DaysPicker.prototype.build = function() {
-        var currentDateObj, date, day, i, items, j, k, l, n, nextDateObj, o, p, prevDateObj, q, ref, ref1, ref2, ref3, results, row, weeksCount;
-        this.scope.current.setMonth(this.scope.now.getMonth() + this.scope.page);
+        var currentDateObj, date, day, i, items, j, k, l, n, nextDateObj, o, p, prevDateObj, q, ref, ref1, ref2, ref3, ref4, results, row, weeksCount;
+        this.scope.current = new Date(this.scope.now.getFullYear(), this.scope.now.getMonth() + this.scope.page, this.scope.now.getDate());
         items = [];
         prevDateObj = new DateObject(this.scope.current, -1);
         currentDateObj = new DateObject(this.scope.current);
         nextDateObj = new DateObject(this.scope.current, 1);
         if (currentDateObj.firstDayMonth !== this.scope.startDay) {
-          if (prevDateObj.lastDayMonth === 0) {
-            items.push(this.createItem(prevDateObj.date.getFullYear(), prevDateObj.date.getMonth(), prevDateObj.date.daysCount));
-          } else {
-            for (day = k = 1, ref = prevDateObj.lastDayMonth; 1 <= ref ? k <= ref : k >= ref; day = 1 <= ref ? ++k : --k) {
-              prevDateObj.date.setDate(prevDateObj.daysCount - prevDateObj.lastDayMonth + day);
-              items.push(this.createItem(prevDateObj.date.getFullYear(), prevDateObj.date.getMonth(), prevDateObj.date.getDate()));
-            }
+          for (day = k = ref = this.scope.startDay, ref1 = prevDateObj.lastDayMonth; ref <= ref1 ? k <= ref1 : k >= ref1; day = ref <= ref1 ? ++k : --k) {
+            items.push(this.createItem(prevDateObj.date.getFullYear(), prevDateObj.date.getMonth(), prevDateObj.daysCount - prevDateObj.lastDayMonth + day));
           }
         }
-        for (day = l = 1, ref1 = currentDateObj.daysCount; 1 <= ref1 ? l <= ref1 : l >= ref1; day = 1 <= ref1 ? ++l : --l) {
+        for (day = l = 1, ref2 = currentDateObj.daysCount; 1 <= ref2 ? l <= ref2 : l >= ref2; day = 1 <= ref2 ? ++l : --l) {
           items.push(this.createItem(currentDateObj.date.getFullYear(), currentDateObj.date.getMonth(), day));
         }
         weeksCount = Math.ceil(items.length / 7);
-        for (day = n = 0, ref2 = weeksCount * 7 - items.length; 0 <= ref2 ? n <= ref2 : n >= ref2; day = 0 <= ref2 ? ++n : --n) {
+        for (day = n = 0, ref3 = weeksCount * 7 - items.length; 0 <= ref3 ? n <= ref3 : n >= ref3; day = 0 <= ref3 ? ++n : --n) {
           nextDateObj.date.setDate(day + 1);
           items.push(this.createItem(nextDateObj.date.getFullYear(), nextDateObj.date.getMonth(), nextDateObj.date.getDate()));
         }
         this.scope.rows = [];
-        for (i = o = 0, ref3 = weeksCount - 1; 0 <= ref3 ? o <= ref3 : o >= ref3; i = 0 <= ref3 ? ++o : --o) {
+        for (i = o = 0, ref4 = weeksCount - 1; 0 <= ref4 ? o <= ref4 : o >= ref4; i = 0 <= ref4 ? ++o : --o) {
           row = {
             cells: []
           };
@@ -696,7 +692,7 @@ angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
           if (diff == null) {
             diff = 0;
           }
-          this.date = new Date(this.date.getFullYear(), this.date.getMonth() + diff, this.date.getDate());
+          this.date = new Date(this.date.getFullYear(), this.date.getMonth() + diff, 1);
           this.daysCount = new Date(this.date.getFullYear(), this.date.getMonth() + 1, 0).getDate();
           this.firstDayMonth = new Date(this.date.getFullYear(), this.date.getMonth(), 1).getDay();
           this.lastDayMonth = new Date(this.date.getFullYear(), this.date.getMonth(), this.daysCount).getDay();
@@ -739,6 +735,7 @@ angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
           $scope.page = 0;
           $scope.isOpen = false;
           $scope.value = null;
+          $scope.changeView = false;
           $scope.now = new Date();
           if ($scope.type == null) {
             $scope.type = ngCoreDatepicker.type;
@@ -793,7 +790,9 @@ angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
             return changePicker(new YearsPicker(), $scope);
           };
           $scope.$on('body.click', function(event, args) {
-            if ($scope.isOpen && !$element[0].contains(args.target)) {
+            if ($scope.changeView) {
+              return $scope.changeView = false;
+            } else if ($scope.isOpen && !$scope.changeView && !$element[0].contains(args.target)) {
               return $scope.isOpen = false;
             }
           });
@@ -1685,7 +1684,9 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
     return {
       scope: {
         name: '@',
-        "class": '@'
+        "class": '@',
+        lblClass: '@',
+        wrpClass: '@'
       },
       restrict: 'E',
       require: '^coreDetails',
@@ -1693,6 +1694,9 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
         var content;
         content = $element.html();
         return function($scope, $element, $attrs, $ctrl) {
+          if ($scope.lblClass == null) {
+            $scope.lblClass = 'col-sm-2';
+          }
           $scope.content = content;
           return $ctrl.add($scope);
         };
