@@ -1165,9 +1165,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
                 return params[input.attr('name')] = input.val();
               }
             } else {
-              if (input.val()) {
-                return params[input.attr('name')] = input.val();
-              }
+              return params[input.attr('name')] = input.val();
             }
           }
         });

@@ -117,8 +117,7 @@ angular
                             if input.val()
                                 params[input.attr('name')] = input.val()
                         else
-                            if input.val()
-                                params[input.attr('name')] = input.val()
+                            params[input.attr('name')] = input.val()
             )
 
 
