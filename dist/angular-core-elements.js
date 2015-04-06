@@ -36,6 +36,35 @@ angular.module('ngCoreElements', ['ngCoreElementAutocomplete', 'ngCoreElementBut
       }
     };
   }
+]).provider('$urlFor', [
+  function() {
+    this.routes = {};
+    this.set = function(name, path) {
+      return this.routes[name] = path;
+    };
+    this.$get = (function(_this) {
+      return function() {
+        return {
+          get: function(name) {
+            var parts;
+            console.log(_this.routes);
+            parts = name.split('/');
+            if (parts.length && _this.routes[parts[0]]) {
+              parts[0] = _this.routes[parts[0]];
+              return parts.join('/');
+            } else {
+              if (_this.routes[name] != null) {
+                return _this.routes[name];
+              } else {
+                return null;
+              }
+            }
+          }
+        };
+      };
+    })(this);
+    return this;
+  }
 ]);
 
 Date.prototype.format = function(format) {
@@ -1387,6 +1416,7 @@ angular.module('ngCoreElementModal', []).directive('coreModal', [
       scope: {
         animation: '@',
         title: '@',
+        submitText: '@',
         autoOpen: '=?',
         opener: '@',
         openerEvent: '@',
@@ -1415,6 +1445,7 @@ angular.module('ngCoreElementModal', []).directive('coreModal', [
           $scope.close = this.hide = function() {
             return $scope.isOpen = false;
           };
+          $scope.submit = $scope.close;
           if (($scope.opener != null) && $scope.opener.length) {
             return angular.element(document.querySelector($scope.opener)).bind($scope.openerEvent, function() {
               return $scope.open();

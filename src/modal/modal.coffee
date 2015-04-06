@@ -4,6 +4,7 @@ angular
         scope:
             animation: '@'
             title: '@'
+            submitText: '@'
             autoOpen: '=?'
             opener: '@'
             openerEvent: '@'
@@ -20,7 +21,7 @@ angular
             $scope.model = @
             $scope.open = @show = -> $scope.isOpen = true
             $scope.close = @hide = -> $scope.isOpen = false
-
+            $scope.submit = $scope.close
             angular
                 .element(document.querySelector($scope.opener))
                 .bind($scope.openerEvent, -> $scope.open()) if $scope.opener? and $scope.opener.length

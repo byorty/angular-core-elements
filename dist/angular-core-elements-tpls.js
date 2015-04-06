@@ -227,29 +227,64 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
 
 
   $templateCache.put('/angular-core-elements/src/modal/modal.html',
-    "<div class=\"modal {{animation}}\" ng-class=\"{'show in': isOpen}\">\n" +
-    "    <div class=\"modal-backdrop {{animation}}\"\n" +
-    "         ng-class=\"{'show in': isOpen}\"\n" +
-    "         ng-click=\"close()\"></div>\n" +
-    "    <div class=\"modal-dialog\">\n" +
-    "        <div class=\"modal-content\">\n" +
-    "            <div class=\"modal-header\">\n" +
-    "                <button type=\"button\"\n" +
-    "                        class=\"close\"\n" +
-    "                        data-dismiss=\"modal\"\n" +
-    "                        aria-label=\"Close\"\n" +
-    "                        ng-click=\"close()\">\n" +
-    "                    <span aria-hidden=\"true\">&times;</span>\n" +
-    "                </button>\n" +
-    "                <h4 class=\"modal-title\">{{title}}</h4>\n" +
-    "            </div>\n" +
-    "            <div class=\"modal-body\" ng-transclude></div>\n" +
-    "            <!--<div class=\"modal-footer\">-->\n" +
-    "                <!--<button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">Close</button>-->\n" +
-    "                <!--<button type=\"button\" class=\"btn btn-primary\">Save changes</button>-->\n" +
-    "            <!--</div>-->\n" +
-    "        </div>\n" +
-    "    </div>\n" +
+    "<div>\r" +
+    "\n" +
+    "    <div class=\"modal {{animation}}\" ng-class=\"{'show in': isOpen}\">\r" +
+    "\n" +
+    "        <div class=\"modal-dialog\">\r" +
+    "\n" +
+    "            <div class=\"modal-content\">\r" +
+    "\n" +
+    "                <div class=\"modal-header\">\r" +
+    "\n" +
+    "                    <button type=\"button\"\r" +
+    "\n" +
+    "                            class=\"close\"\r" +
+    "\n" +
+    "                            data-dismiss=\"modal\"\r" +
+    "\n" +
+    "                            aria-label=\"Close\"\r" +
+    "\n" +
+    "                            ng-click=\"close()\">\r" +
+    "\n" +
+    "                        <span aria-hidden=\"true\">&times;</span>\r" +
+    "\n" +
+    "                    </button>\r" +
+    "\n" +
+    "                    <h4 class=\"modal-title\">{{title}}</h4>\r" +
+    "\n" +
+    "                </div>\r" +
+    "\n" +
+    "                <div class=\"modal-body\" ng-transclude></div>\r" +
+    "\n" +
+    "                <!--<div class=\"modal-footer\">-->\r" +
+    "\n" +
+    "                    <!--<button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">Close</button>-->\r" +
+    "\n" +
+    "                    <!--<button type=\"button\" class=\"btn btn-primary\">Save changes</button>-->\r" +
+    "\n" +
+    "                <!--</div>-->\r" +
+    "\n" +
+    "                <div class=\"modal-footer\">\r" +
+    "\n" +
+    "                    <button class=\"btn btn btn-primary pull-right\" ng-click=\"close()\">Ок</button>\r" +
+    "\n" +
+    "                </div>\r" +
+    "\n" +
+    "            </div>\r" +
+    "\n" +
+    "        </div>\r" +
+    "\n" +
+    "    </div>\r" +
+    "\n" +
+    "    <div class=\"modal-backdrop {{animation}}\"\r" +
+    "\n" +
+    "         ng-class=\"{'show in': isOpen}\"\r" +
+    "\n" +
+    "         ng-if=\"isOpen\"\r" +
+    "\n" +
+    "         ng-click=\"close()\"></div>\r" +
+    "\n" +
     "</div>"
   );
 
