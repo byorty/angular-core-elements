@@ -61,7 +61,7 @@ angular
             @getCollectionName = -> $attrs.items
             @getParentScope = -> parentScope
 
-            while parentScope isnt null and !parentScope.hasOwnProperty(@getCollectionName())
+            while !parentScope.hasOwnProperty(@getCollectionName()) or (parentScope.hasOwnProperty(@getCollectionName()) and $scope.$id is parentScope.$id)
                 parentScope = parentScope.$parent
 
             search = $location.search()
@@ -71,12 +71,13 @@ angular
             $scope.selectPage($scope.currentPage) if $scope.itemsCount and $scope.itemsPerPage
             $scope.changeUrlOnStart = true
 
-            parentScope.$watch(
-                @getCollectionName()
-                (newRows, oldRows, scope) =>
-                    $scope.items = scope[@getCollectionName()] if scope[@getCollectionName()]? and $scope.items isnt scope[@getCollectionName()]
-                true
-            )
+            if parentScope?
+              parentScope.$watch(
+                  @getCollectionName()
+                  (newRows, oldRows, scope) =>
+                      $scope.items = scope[@getCollectionName()] if scope[@getCollectionName()]? and $scope.items isnt scope[@getCollectionName()]
+                  true
+              )
         ]
     ])
     .directive('coreCol', [ ->
@@ -137,7 +138,7 @@ angular
         require: '^coreDetails'
         link: ($scope, $element, $attrs, $ctrl) ->
             compileCell($element, $scope.row.content, $ctrl.getCollectionName(), $ctrl.getParentScope())
-])
+    ])
     .factory(
         'compileCell'
         ['$compile', ($compile) ->
