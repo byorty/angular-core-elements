@@ -1644,7 +1644,7 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
           this.getParentScope = function() {
             return parentScope;
           };
-          while (parentScope !== null && !parentScope.hasOwnProperty(this.getCollectionName())) {
+          while (!parentScope.hasOwnProperty(this.getCollectionName()) || (parentScope.hasOwnProperty(this.getCollectionName()) && $scope.$id === parentScope.$id)) {
             parentScope = parentScope.$parent;
           }
           search = $location.search();
@@ -1655,13 +1655,15 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
             $scope.selectPage($scope.currentPage);
           }
           $scope.changeUrlOnStart = true;
-          return parentScope.$watch(this.getCollectionName(), (function(_this) {
-            return function(newRows, oldRows, scope) {
-              if ((scope[_this.getCollectionName()] != null) && $scope.items !== scope[_this.getCollectionName()]) {
-                return $scope.items = scope[_this.getCollectionName()];
-              }
-            };
-          })(this), true);
+          if (parentScope != null) {
+            return parentScope.$watch(this.getCollectionName(), (function(_this) {
+              return function(newRows, oldRows, scope) {
+                if ((scope[_this.getCollectionName()] != null) && $scope.items !== scope[_this.getCollectionName()]) {
+                  return $scope.items = scope[_this.getCollectionName()];
+                }
+              };
+            })(this), true);
+          }
         }
       ]
     };
