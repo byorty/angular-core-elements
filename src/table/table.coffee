@@ -114,7 +114,7 @@ angular
             @getCollectionName = -> $attrs.item
             @getParentScope = -> parentScope
 
-            while parentScope isnt null and !parentScope.hasOwnProperty(@getCollectionName())
+            while !parentScope.hasOwnProperty(@getCollectionName()) or (parentScope.hasOwnProperty(@getCollectionName()) and $scope.$id is parentScope.$id)
                 parentScope = parentScope.$parent
         ]
     ])

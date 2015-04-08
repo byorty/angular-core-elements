@@ -1702,7 +1702,7 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
             return parentScope;
           };
           results = [];
-          while (parentScope !== null && !parentScope.hasOwnProperty(this.getCollectionName())) {
+          while (!parentScope.hasOwnProperty(this.getCollectionName()) || (parentScope.hasOwnProperty(this.getCollectionName()) && $scope.$id === parentScope.$id)) {
             results.push(parentScope = parentScope.$parent);
           }
           return results;
