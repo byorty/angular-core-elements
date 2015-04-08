@@ -4,7 +4,6 @@ angular
         scope:
             animation: '@'
             title: '@'
-            submitText: '@'
             autoOpen: '=?'
             opener: '@'
             openerEvent: '@'
@@ -21,9 +20,23 @@ angular
             $scope.model = @
             $scope.open = @show = -> $scope.isOpen = true
             $scope.close = @hide = -> $scope.isOpen = false
-            $scope.submit = $scope.close
+            $scope.buttons = []
+            @add = (btn) -> $scope.buttons.push(btn)
+
             angular
                 .element(document.querySelector($scope.opener))
                 .bind($scope.openerEvent, -> $scope.open()) if $scope.opener? and $scope.opener.length
         ]
     ])
+    .directive('coreModalButton', ['$parse', ($parse) ->
+            scope:
+                title: '@',
+                class: '@',
+                click: '&'
+            require: '^coreModal'
+            restrict: 'E'
+            replace: true
+            link: ($scope, $element, $attrs, $ctrl) ->
+                $scope.click = $parse($scope.click)
+                $ctrl.add($scope)
+        ])

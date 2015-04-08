@@ -257,17 +257,9 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "\n" +
     "                <div class=\"modal-body\" ng-transclude></div>\r" +
     "\n" +
-    "                <!--<div class=\"modal-footer\">-->\r" +
+    "                <div class=\"modal-footer\" ng-if=\"buttons.length\">\r" +
     "\n" +
-    "                    <!--<button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">Close</button>-->\r" +
-    "\n" +
-    "                    <!--<button type=\"button\" class=\"btn btn-primary\">Save changes</button>-->\r" +
-    "\n" +
-    "                <!--</div>-->\r" +
-    "\n" +
-    "                <div class=\"modal-footer\">\r" +
-    "\n" +
-    "                    <button class=\"btn btn btn-primary pull-right\" ng-click=\"close()\">Ок</button>\r" +
+    "                    <button class=\"btn {{btn.class}}\" ng-click=\"btn.click()\" ng-repeat=\"btn in buttons\">{{btn.title}}\r" +
     "\n" +
     "                </div>\r" +
     "\n" +
@@ -275,15 +267,15 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "\n" +
     "        </div>\r" +
     "\n" +
+    "        <div class=\"modal-backdrop {{animation}}\"\r" +
+    "\n" +
+    "             ng-class=\"{'show in': isOpen}\"\r" +
+    "\n" +
+    "             ng-if=\"isOpen\"\r" +
+    "\n" +
+    "             ng-click=\"close()\"></div>\r" +
+    "\n" +
     "    </div>\r" +
-    "\n" +
-    "    <div class=\"modal-backdrop {{animation}}\"\r" +
-    "\n" +
-    "         ng-class=\"{'show in': isOpen}\"\r" +
-    "\n" +
-    "         ng-if=\"isOpen\"\r" +
-    "\n" +
-    "         ng-click=\"close()\"></div>\r" +
     "\n" +
     "</div>"
   );

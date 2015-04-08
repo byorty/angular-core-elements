@@ -1416,7 +1416,6 @@ angular.module('ngCoreElementModal', []).directive('coreModal', [
       scope: {
         animation: '@',
         title: '@',
-        submitText: '@',
         autoOpen: '=?',
         opener: '@',
         openerEvent: '@',
@@ -1445,7 +1444,10 @@ angular.module('ngCoreElementModal', []).directive('coreModal', [
           $scope.close = this.hide = function() {
             return $scope.isOpen = false;
           };
-          $scope.submit = $scope.close;
+          $scope.buttons = [];
+          this.add = function(btn) {
+            return $scope.buttons.push(btn);
+          };
           if (($scope.opener != null) && $scope.opener.length) {
             return angular.element(document.querySelector($scope.opener)).bind($scope.openerEvent, function() {
               return $scope.open();
@@ -1453,6 +1455,23 @@ angular.module('ngCoreElementModal', []).directive('coreModal', [
           }
         }
       ]
+    };
+  }
+]).directive('coreModalButton', [
+  '$parse', function($parse) {
+    return {
+      scope: {
+        title: '@',
+        "class": '@',
+        click: '&'
+      },
+      require: '^coreModal',
+      restrict: 'E',
+      replace: true,
+      link: function($scope, $element, $attrs, $ctrl) {
+        $scope.click = $parse($scope.click);
+        return $ctrl.add($scope);
+      }
     };
   }
 ]);
