@@ -290,6 +290,6 @@ angular
             $ctrl.addListener(
                 $ctrl.getSendEvent()
                 $scope.name
-                (params) -> params[$scope.name] = $scope.value if $scope.checked
+                (params) -> params[$scope.name] = $scope.value
             )
     ])

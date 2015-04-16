@@ -1401,9 +1401,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
           throw new Error('name should be defined');
         }
         return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
-          if ($scope.checked) {
-            return params[$scope.name] = $scope.value;
-          }
+          return params[$scope.name] = $scope.value;
         });
       }
     };
