@@ -108,7 +108,7 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
   $templateCache.put('/angular-core-elements/src/form/form.html',
     "<form>\n" +
     "    <div ng-transclude></div>\n" +
-    "    <div class=\"error-wrapper\" ng-bind-html=\"error\"></div>\n" +
+    "    <div class=\"error-wrapper\" ng-if=\"error\" ng-bind-html=\"error\"></div>\n" +
     "</form>"
   );
 

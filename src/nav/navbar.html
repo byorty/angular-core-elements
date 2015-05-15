@@ -1,0 +1,6 @@
+<ul class="nav navbar-nav">
+    <li ng-repeat="item in items" ng-class="{active: item.active}">
+        <p class="navbar-text" ng-if="!item.link">{{item.text}}</p>
+        <a href="{{item.link}}" ng-if="item.link" target="{{item.target}}">{{item.text}}</a>
+    </li>
+</ul>

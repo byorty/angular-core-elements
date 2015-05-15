@@ -10,6 +10,7 @@ angular
         'ngCoreElementModal',
         'ngCoreElementPanel',
         'ngCoreElementTable',
+        'ngCoreElementNav',
     ])
     .factory('$service', [ ->
         class Service
