@@ -1065,7 +1065,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
             trigger($scope.sendEvent, params);
             $scope.$emit($scope.sendEvent, params);
             return $service.getByPath($scope.service)(params, function(resp) {
-              var error, errors, name;
+              var errors, message, name;
               trigger($scope.receiveEvent, resp);
               $scope.$emit($scope.receiveEvent, resp);
               if (resp.success === true) {
@@ -1089,8 +1089,8 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
                     ref = resp.messages;
                     results = [];
                     for (name in ref) {
-                      error = ref[name];
-                      results.push("<div class=" + name + ">" + error.message + "</div>");
+                      message = ref[name];
+                      results.push("<div class=" + name + ">" + message + "</div>");
                     }
                     return results;
                   })();
@@ -1831,7 +1831,7 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
   $templateCache.put('/angular-core-elements/src/form/form.html',
     "<form>\n" +
     "    <div ng-transclude></div>\n" +
-    "    <div class=\"error-wrapper\" ng-bind-html=\"error\"></div>\n" +
+    "    <div class=\"error-wrapper\" ng-if=\"error\" ng-bind-html=\"error\"></div>\n" +
     "</form>"
   );
 

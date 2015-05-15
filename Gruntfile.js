@@ -20,6 +20,7 @@ module.exports = function (grunt) {
                         'src/modal/modal.coffee',
                         'src/panel/panel.coffee',
                         'src/table/table.coffee',
+                        'src/nav/nav.coffee',
                     ]
                 }
             }

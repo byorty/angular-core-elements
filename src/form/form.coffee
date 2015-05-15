@@ -58,8 +58,8 @@ angular
 
                         if resp.messages?
                             trigger($scope.errorEvent, resp)
-                            errors = for name, error of resp.messages
-                                "<div class=#{name}>#{error.message}</div>"
+                            errors = for name, message of resp.messages
+                                "<div class=#{name}>#{message}</div>"
                             $scope.error = errors.join('');
                 )
         ]

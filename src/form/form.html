@@ -1,4 +1,4 @@
 <form>
     <div ng-transclude></div>
-    <div class="error-wrapper" ng-bind-html="error"></div>
+    <div class="error-wrapper" ng-if="error" ng-bind-html="error"></div>
 </form>
