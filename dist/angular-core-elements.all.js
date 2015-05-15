@@ -3,7 +3,7 @@
 var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
-angular.module('ngCoreElements', ['ngCoreElementAutocomplete', 'ngCoreElementButton', 'ngCoreElementDatepicker', 'ngCoreElementDropdown', 'ngCoreElementForm', 'ngCoreElementModal', 'ngCoreElementPanel', 'ngCoreElementTable']).factory('$service', [
+angular.module('ngCoreElements', ['ngCoreElementAutocomplete', 'ngCoreElementButton', 'ngCoreElementDatepicker', 'ngCoreElementDropdown', 'ngCoreElementForm', 'ngCoreElementModal', 'ngCoreElementPanel', 'ngCoreElementTable', 'ngCoreElementNav']).factory('$service', [
   function() {
     var Service;
     return Service = (function() {
@@ -1772,6 +1772,85 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
   }
 ]);
 
+angular.module('ngCoreElementNav', []).directive('coreNavbar', [
+  '$rootScope', '$location', 'ngCoreNavbar', function($rootScope, $location, ngCoreNavbar) {
+    return {
+      scope: {
+        items: '=',
+        subRoutesChangeEvent: '@'
+      },
+      restrict: 'E',
+      replace: true,
+      templateUrl: '/angular-core-elements/src/nav/navbar.html',
+      controller: [
+        '$scope', function($scope) {
+          if ($scope.items == null) {
+            throw new Error('items should be defined');
+          }
+          if ($scope.subRoutesChangeEvent == null) {
+            $scope.subRoutesChangeEvent = ngCoreNavbar.subRoutesChangeEvent;
+          }
+          return $scope.$on('$routeChangeStart', function() {
+            var i, isActive, j, k, l, ref, ref1, ref2, results, url;
+            url = ($location.protocol()) + "://" + ($location.host()) + ($location.path()) + "/";
+            results = [];
+            for (i = k = 0, ref = $scope.items.length - 1; 0 <= ref ? k <= ref : k >= ref; i = 0 <= ref ? ++k : --k) {
+              isActive = ($scope.items[i].link != null) && new RegExp("^" + $scope.items[i].link).test(url);
+              if ((ref1 = $scope.items[i].subroutes) != null ? ref1.length : void 0) {
+                for (j = l = 0, ref2 = $scope.items[i].subroutes.length - 1; 0 <= ref2 ? l <= ref2 : l >= ref2; j = 0 <= ref2 ? ++l : --l) {
+                  $scope.items[i].subroutes[j].active = new RegExp("^" + $scope.items[i].subroutes[j].link).test(url);
+                  if ($scope.items[i].subroutes[j].active && !isActive) {
+                    isActive = true;
+                  }
+                }
+              }
+              $scope.items[i].active = isActive;
+              if ($scope.items[i].active) {
+                $scope.items[i].active = true;
+                results.push($rootScope.$broadcast($scope.subRoutesChangeEvent, $scope.items[i].subroutes));
+              } else {
+                results.push(void 0);
+              }
+            }
+            return results;
+          });
+        }
+      ]
+    };
+  }
+]).provider('ngCoreNavbar', function() {
+  this.subRoutesChangeEvent = 'sub.items.change.event';
+  this.$get = (function(_this) {
+    return function() {
+      return {
+        subRoutesChangeEvent: _this.subRoutesChangeEvent
+      };
+    };
+  })(this);
+}).directive('coreSubNav', [
+  '$location', 'ngCoreNavbar', function($location, ngCoreNavbar) {
+    return {
+      scope: {
+        subRoutesChangeEvent: '@'
+      },
+      restrict: 'E',
+      replace: true,
+      templateUrl: '/angular-core-elements/src/nav/nav.html',
+      controller: [
+        '$scope', function($scope) {
+          $scope.items = null;
+          if ($scope.subRoutesChangeEvent == null) {
+            $scope.subRoutesChangeEvent = ngCoreNavbar.subRoutesChangeEvent;
+          }
+          return $scope.$on($scope.subRoutesChangeEvent, function(_, items) {
+            return $scope.items = items;
+          });
+        }
+      ]
+    };
+  }
+]);
+
 angular.module('ngCoreElements').run(['$templateCache', function($templateCache) {
   'use strict';
 
@@ -2051,6 +2130,25 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "    </div>\r" +
     "\n" +
     "</div>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/nav/nav.html',
+    "<ul class=\"nav\">\n" +
+    "    <li role=\"presentation\" ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
+    "        <a href=\"{{item.link}}\">{{item.text}}</a>\n" +
+    "    </li>\n" +
+    "</ul>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/nav/navbar.html',
+    "<ul class=\"nav navbar-nav\">\n" +
+    "    <li ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
+    "        <p class=\"navbar-text\" ng-if=\"!item.link\">{{item.text}}</p>\n" +
+    "        <a href=\"{{item.link}}\" ng-if=\"item.link\" target=\"{{item.target}}\">{{item.text}}</a>\n" +
+    "    </li>\n" +
+    "</ul>"
   );
 
 

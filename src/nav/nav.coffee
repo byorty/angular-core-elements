@@ -12,16 +12,21 @@ angular
             $scope.subRoutesChangeEvent = ngCoreNavbar.subRoutesChangeEvent unless $scope.subRoutesChangeEvent?
 
             $scope.$on('$routeChangeStart', ->
-                regexp = new RegExp("^#{$location.protocol()}:#{$location.host()}//#{$location.path()}")
-                for i in [0..$scope.items.length]
-                    if $scope.items[i].link? and regexp.test($scope.items[i].link)
+                url = "#{$location.protocol()}://#{$location.host()}#{$location.path()}/"
+                for i in [0..$scope.items.length - 1]
+                    isActive = $scope.items[i].link? and new RegExp("^#{$scope.items[i].link}").test(url)
+                    if $scope.items[i].subroutes?.length
+                        for j in [0..$scope.items[i].subroutes.length - 1]
+                            $scope.items[i].subroutes[j].active = new RegExp("^#{$scope.items[i].subroutes[j].link}").test(url)
+                            isActive = true if $scope.items[i].subroutes[j].active and !isActive
+
+                    $scope.items[i].active = isActive
+                    if $scope.items[i].active
                         $scope.items[i].active = true
                         $rootScope.$broadcast(
                             $scope.subRoutesChangeEvent,
-                            $scope.items[i].subitems
-                        ) if $scope.items[i].subitems? and $scope.items[i].subitems.length
-                    else
-                        $scope.items[i].active = false
+                            $scope.items[i].subroutes
+                        )
             )
         ]
     ])
@@ -31,7 +36,7 @@ angular
             subRoutesChangeEvent: @subRoutesChangeEvent
         return
     )
-    .directive('coreSubNav', ['ngCoreNavbar', (ngCoreNavbar) ->
+    .directive('coreSubNav', ['$location', 'ngCoreNavbar', ($location, ngCoreNavbar) ->
         scope:
             subRoutesChangeEvent: '@'
         restrict: 'E'
@@ -43,14 +48,6 @@ angular
 
             $scope.$on($scope.subRoutesChangeEvent, (_, items) ->
                 $scope.items = items
-            )
-            $scope.$on('$routeChangeStart', ->
-                regexp = new RegExp("^#{$location.protocol()}:#{$location.host()}//#{$location.path()}")
-                for i in [0..$scope.items.length]
-                    if $scope.items[i].link? and regexp.test($scope.items[i].link)
-                        $scope.items[i].active = true
-                    else
-                        $scope.items[i].active = false
             )
         ]
     ])

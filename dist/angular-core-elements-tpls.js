@@ -281,6 +281,25 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
   );
 
 
+  $templateCache.put('/angular-core-elements/src/nav/nav.html',
+    "<ul class=\"nav\">\n" +
+    "    <li role=\"presentation\" ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
+    "        <a href=\"{{item.link}}\">{{item.text}}</a>\n" +
+    "    </li>\n" +
+    "</ul>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/nav/navbar.html',
+    "<ul class=\"nav navbar-nav\">\n" +
+    "    <li ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
+    "        <p class=\"navbar-text\" ng-if=\"!item.link\">{{item.text}}</p>\n" +
+    "        <a href=\"{{item.link}}\" ng-if=\"item.link\" target=\"{{item.target}}\">{{item.text}}</a>\n" +
+    "    </li>\n" +
+    "</ul>"
+  );
+
+
   $templateCache.put('/angular-core-elements/src/panel/panel-header.html',
     "<div class=\"panel-heading clearfix\">\n" +
     "    <h4 ng-transclude class=\"pull-left\"></h4>\n" +
