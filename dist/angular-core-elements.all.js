@@ -36,6 +36,35 @@ angular.module('ngCoreElements', ['ngCoreElementAutocomplete', 'ngCoreElementBut
       }
     };
   }
+]).provider('$urlFor', [
+  function() {
+    this.routes = {};
+    this.set = function(name, path) {
+      return this.routes[name] = path;
+    };
+    this.$get = (function(_this) {
+      return function() {
+        return {
+          get: function(name) {
+            var parts;
+            console.log(_this.routes);
+            parts = name.split('/');
+            if (parts.length && _this.routes[parts[0]]) {
+              parts[0] = _this.routes[parts[0]];
+              return parts.join('/');
+            } else {
+              if (_this.routes[name] != null) {
+                return _this.routes[name];
+              } else {
+                return null;
+              }
+            }
+          }
+        };
+      };
+    })(this);
+    return this;
+  }
 ]);
 
 Date.prototype.format = function(format) {
@@ -1592,7 +1621,7 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
           this.getParentScope = function() {
             return parentScope;
           };
-          while (parentScope !== null && !parentScope.hasOwnProperty(this.getCollectionName())) {
+          while (!parentScope.hasOwnProperty(this.getCollectionName()) || (parentScope.hasOwnProperty(this.getCollectionName()) && $scope.$id === parentScope.$id)) {
             parentScope = parentScope.$parent;
           }
           search = $location.search();
@@ -1603,13 +1632,15 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
             $scope.selectPage($scope.currentPage);
           }
           $scope.changeUrlOnStart = true;
-          return parentScope.$watch(this.getCollectionName(), (function(_this) {
-            return function(newRows, oldRows, scope) {
-              if ((scope[_this.getCollectionName()] != null) && $scope.items !== scope[_this.getCollectionName()]) {
-                return $scope.items = scope[_this.getCollectionName()];
-              }
-            };
-          })(this), true);
+          if (parentScope != null) {
+            return parentScope.$watch(this.getCollectionName(), (function(_this) {
+              return function(newRows, oldRows, scope) {
+                if ((scope[_this.getCollectionName()] != null) && $scope.items !== scope[_this.getCollectionName()]) {
+                  return $scope.items = scope[_this.getCollectionName()];
+                }
+              };
+            })(this), true);
+          }
         }
       ]
     };

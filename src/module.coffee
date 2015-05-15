@@ -33,6 +33,20 @@ angular
                 )
             )
     ])
+    .provider('$urlFor', [ ->
+        @routes = {}
+        @set = (name, path) -> @routes[name] = path
+        @$get = =>
+            get: (name) =>
+                console.log(@routes)
+                parts = name.split('/')
+                if parts.length and @routes[parts[0]]
+                    parts[0] = @routes[parts[0]]
+                    return parts.join('/')
+                else
+                    return if @routes[name]? then @routes[name] else null
+        @
+    ])
 
 Date.prototype.format = (format) ->
     returnStr = '';
