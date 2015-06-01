@@ -31,17 +31,16 @@ angular
             $scope.$watch(
                 'search'
                 ->
-                    if $scope.search?
-                        if promise? then $timeout.cancel(promise)
-                        promise = $timeout(
-                            ->
-                                $rootScope.$broadcast($scope.searchEvent, $scope.search)
-                                $scope.search = null if !$scope.search.length
-                                if $scope.changeUrl
-                                    $location.search($scope.queryName, $scope.search)
-                                    $location.search('page', null)
-                            $scope.delay
-                        )
+                    if promise? then $timeout.cancel(promise)
+                    promise = $timeout(
+                        ->
+                            $rootScope.$broadcast($scope.searchEvent, $scope.search)
+                            $scope.search = null if $scope.search? and !$scope.search.length
+                            if $scope.changeUrl
+                                $location.search($scope.queryName, $scope.search)
+                                $location.search('page', null)
+                        $scope.delay
+                    )
             )
 
             $scope.onChange = (search) -> $scope.search = search
