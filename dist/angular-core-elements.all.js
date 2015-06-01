@@ -1518,21 +1518,19 @@ angular.module('ngCoreElementPanel', []).directive('corePanel', [
           }
           promise = null;
           $scope.$watch('search', function() {
-            if ($scope.search != null) {
-              if (promise != null) {
-                $timeout.cancel(promise);
-              }
-              return promise = $timeout(function() {
-                $rootScope.$broadcast($scope.searchEvent, $scope.search);
-                if (!$scope.search.length) {
-                  $scope.search = null;
-                }
-                if ($scope.changeUrl) {
-                  $location.search($scope.queryName, $scope.search);
-                  return $location.search('page', null);
-                }
-              }, $scope.delay);
+            if (promise != null) {
+              $timeout.cancel(promise);
             }
+            return promise = $timeout(function() {
+              $rootScope.$broadcast($scope.searchEvent, $scope.search);
+              if (($scope.search != null) && !$scope.search.length) {
+                $scope.search = null;
+              }
+              if ($scope.changeUrl) {
+                $location.search($scope.queryName, $scope.search);
+                return $location.search('page', null);
+              }
+            }, $scope.delay);
           });
           $scope.onChange = function(search) {
             return $scope.search = search;
