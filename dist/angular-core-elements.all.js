@@ -1833,7 +1833,7 @@ angular.module('ngCoreElementNav', []).directive('coreNavbar', [
       },
       restrict: 'E',
       replace: true,
-      templateUrl: '/angular-core-elements/src/nav/nav.html',
+      templateUrl: '/angular-core-elements/src/nav/subrouting-nav.html',
       controller: [
         '$scope', function($scope) {
           $scope.items = null;
@@ -1845,6 +1845,75 @@ angular.module('ngCoreElementNav', []).directive('coreNavbar', [
           });
         }
       ]
+    };
+  }
+]).directive('coreContentTabs', [
+  '$compile', '$rootScope', 'ngCoreContentTabs', function($compile, $rootScope, ngCoreContentTabs) {
+    return {
+      scope: true,
+      restrict: 'E',
+      replace: true,
+      transclude: true,
+      templateUrl: '/angular-core-elements/src/nav/content-nav.html',
+      controller: [
+        '$scope', '$element', function($scope, $element) {
+          var content;
+          content = angular.element($element[0].querySelector('.content'));
+          $scope.items = [];
+          $scope.select = function(item) {
+            var i, k, ref;
+            content.empty().append(item.content);
+            $compile(content.contents())($scope.$parent);
+            for (i = k = 0, ref = $scope.items.length - 1; 0 <= ref ? k <= ref : k >= ref; i = 0 <= ref ? ++k : --k) {
+              $scope.items[i].active = item.id === $scope.items[i].id ? true : false;
+            }
+            return $rootScope.$broadcast(ngCoreContentTabs.activateEvent, item);
+          };
+          return this.add = function(name, active, content) {
+            var item;
+            item = {
+              id: $scope.items.length + 1,
+              name: name,
+              active: active,
+              content: content
+            };
+            $scope.items.push(item);
+            if (active) {
+              return $scope.select(item);
+            }
+          };
+        }
+      ]
+    };
+  }
+]).provider('ngCoreContentTabs', function() {
+  this.activateEvent = 'content.tabs.activate.event';
+  this.$get = (function(_this) {
+    return function() {
+      return {
+        activateEvent: _this.activateEvent
+      };
+    };
+  })(this);
+}).directive('coreContentTab', [
+  function() {
+    return {
+      scope: {
+        name: '@',
+        active: '=?'
+      },
+      restrict: 'E',
+      require: '^coreContentTabs',
+      link: function($scope, $element, $attrs, $ctrl) {
+        if ($scope.name == null) {
+          throw new Error('name should be defined');
+        }
+        if ($scope.active == null) {
+          $scope.active = false;
+        }
+        $ctrl.add($scope.name, $scope.active, $element.html());
+        return $element.remove();
+      }
     };
   }
 ]);
@@ -1868,6 +1937,15 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "        </ul>\n" +
     "    </div>\n" +
     "</div>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/breadcrumb/breadcrumb.html',
+    "<ol class=\"breadcrumb\">\n" +
+    "    <li ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
+    "        <a href=\"{{item.link}}\">{{item.text}}</a>\n" +
+    "    </li>\n" +
+    "</ol>"
   );
 
 
@@ -2131,11 +2209,13 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
   );
 
 
-  $templateCache.put('/angular-core-elements/src/nav/nav.html',
+  $templateCache.put('/angular-core-elements/src/nav/content-nav.html',
     "<ul class=\"nav\">\n" +
     "    <li role=\"presentation\" ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
-    "        <a href=\"{{item.link}}\">{{item.text}}</a>\n" +
+    "        <a href=\"#\" ng-click=\"$event.preventDefault();select(item)\">{{item.name}}</a>\n" +
     "    </li>\n" +
+    "    <li class=\"content\"></li>\n" +
+    "    <li ng-transclude></li>\n" +
     "</ul>"
   );
 
@@ -2145,6 +2225,15 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "    <li ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
     "        <p class=\"navbar-text\" ng-if=\"!item.link\">{{item.text}}</p>\n" +
     "        <a href=\"{{item.link}}\" ng-if=\"item.link\" target=\"{{item.target}}\">{{item.text}}</a>\n" +
+    "    </li>\n" +
+    "</ul>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/nav/subrouting-nav.html',
+    "<ul class=\"nav\">\n" +
+    "    <li role=\"presentation\" ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
+    "        <a href=\"{{item.link}}\">{{item.text}}</a>\n" +
     "    </li>\n" +
     "</ul>"
   );

@@ -21,6 +21,15 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
   );
 
 
+  $templateCache.put('/angular-core-elements/src/breadcrumb/breadcrumb.html',
+    "<ol class=\"breadcrumb\">\n" +
+    "    <li ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
+    "        <a href=\"{{item.link}}\">{{item.text}}</a>\n" +
+    "    </li>\n" +
+    "</ol>"
+  );
+
+
   $templateCache.put('/angular-core-elements/src/button/button.html',
     "<button type=\"button\" class=\"btn\">\n" +
     "    <span ng-if=\"icon\" class=\"{{icon}}\" aria-hidden=\"true\"></span>\n" +
@@ -281,11 +290,13 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
   );
 
 
-  $templateCache.put('/angular-core-elements/src/nav/nav.html',
+  $templateCache.put('/angular-core-elements/src/nav/content-nav.html',
     "<ul class=\"nav\">\n" +
     "    <li role=\"presentation\" ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
-    "        <a href=\"{{item.link}}\">{{item.text}}</a>\n" +
+    "        <a href=\"#\" ng-click=\"$event.preventDefault();select(item)\">{{item.name}}</a>\n" +
     "    </li>\n" +
+    "    <li class=\"content\"></li>\n" +
+    "    <li ng-transclude></li>\n" +
     "</ul>"
   );
 
@@ -295,6 +306,15 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "    <li ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
     "        <p class=\"navbar-text\" ng-if=\"!item.link\">{{item.text}}</p>\n" +
     "        <a href=\"{{item.link}}\" ng-if=\"item.link\" target=\"{{item.target}}\">{{item.text}}</a>\n" +
+    "    </li>\n" +
+    "</ul>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/nav/subrouting-nav.html',
+    "<ul class=\"nav\">\n" +
+    "    <li role=\"presentation\" ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
+    "        <a href=\"{{item.link}}\">{{item.text}}</a>\n" +
     "    </li>\n" +
     "</ul>"
   );

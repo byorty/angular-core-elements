@@ -41,7 +41,7 @@ angular
             subRoutesChangeEvent: '@'
         restrict: 'E'
         replace: true
-        templateUrl: '/angular-core-elements/src/nav/nav.html'
+        templateUrl: '/angular-core-elements/src/nav/subrouting-nav.html'
         controller: ['$scope', ($scope) ->
             $scope.items = null
             $scope.subRoutesChangeEvent = ngCoreNavbar.subRoutesChangeEvent unless $scope.subRoutesChangeEvent?
@@ -50,4 +50,55 @@ angular
                 $scope.items = items
             )
         ]
+    ])
+    .directive('coreContentTabs', ['$compile', '$rootScope', 'ngCoreContentTabs', ($compile, $rootScope, ngCoreContentTabs) ->
+        scope: true
+        restrict: 'E'
+        replace: true
+        transclude: true
+        templateUrl: '/angular-core-elements/src/nav/content-nav.html'
+        controller: ['$scope', '$element', ($scope, $element) ->
+            content = angular.element($element[0].querySelector('.content'))
+            $scope.items = []
+
+            $scope.select = (item) ->
+                content.empty().append(item.content)
+                $compile(content.contents())($scope.$parent)
+
+                for i in [0..$scope.items.length - 1]
+                    $scope.items[i].active = if item.id is $scope.items[i].id then true else false
+
+                $rootScope.$broadcast(
+                    ngCoreContentTabs.activateEvent
+                    item
+                )
+
+            @add = (name, active, content) ->
+                item =
+                    id: $scope.items.length + 1
+                    name: name
+                    active: active
+                    content: content
+
+                $scope.items.push(item)
+                $scope.select(item) if active
+        ]
+    ])
+    .provider('ngCoreContentTabs', ->
+        @activateEvent = 'content.tabs.activate.event'
+        @$get = =>
+            activateEvent: @activateEvent
+        return
+    )
+    .directive('coreContentTab', [ ->
+        scope:
+            name: '@'
+            active: '=?'
+        restrict: 'E'
+        require: '^coreContentTabs'
+        link: ($scope, $element, $attrs, $ctrl) ->
+            throw new Error('name should be defined') unless $scope.name?
+            $scope.active = false unless $scope.active?
+            $ctrl.add($scope.name, $scope.active, $element.html())
+            $element.remove()
     ])
