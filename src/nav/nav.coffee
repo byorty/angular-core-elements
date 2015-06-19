@@ -52,7 +52,8 @@ angular
         ]
     ])
     .directive('coreContentTabs', ['$compile', '$rootScope', 'ngCoreContentTabs', ($compile, $rootScope, ngCoreContentTabs) ->
-        scope: true
+        scope:
+            class: '@'
         restrict: 'E'
         replace: true
         transclude: true
@@ -60,6 +61,7 @@ angular
         controller: ['$scope', '$element', ($scope, $element) ->
             content = angular.element($element[0].querySelector('.content'))
             $scope.items = []
+            $scope.class = ngCoreContentTabs.defaultClass unless $scope.class
 
             $scope.select = (item) ->
                 content.empty().append(item.content)
@@ -85,9 +87,11 @@ angular
         ]
     ])
     .provider('ngCoreContentTabs', ->
+        @defaultClass = 'nav-tabs'
         @activateEvent = 'content.tabs.activate.event'
         @$get = =>
             activateEvent: @activateEvent
+            defaultClass: @defaultClass
         return
     )
     .directive('coreContentTab', [ ->

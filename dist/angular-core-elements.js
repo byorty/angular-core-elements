@@ -1850,7 +1850,9 @@ angular.module('ngCoreElementNav', []).directive('coreNavbar', [
 ]).directive('coreContentTabs', [
   '$compile', '$rootScope', 'ngCoreContentTabs', function($compile, $rootScope, ngCoreContentTabs) {
     return {
-      scope: true,
+      scope: {
+        "class": '@'
+      },
       restrict: 'E',
       replace: true,
       transclude: true,
@@ -1860,6 +1862,9 @@ angular.module('ngCoreElementNav', []).directive('coreNavbar', [
           var content;
           content = angular.element($element[0].querySelector('.content'));
           $scope.items = [];
+          if (!$scope["class"]) {
+            $scope["class"] = ngCoreContentTabs.defaultClass;
+          }
           $scope.select = function(item) {
             var i, k, ref;
             content.empty().append(item.content);
@@ -1887,11 +1892,13 @@ angular.module('ngCoreElementNav', []).directive('coreNavbar', [
     };
   }
 ]).provider('ngCoreContentTabs', function() {
+  this.defaultClass = 'nav-tabs';
   this.activateEvent = 'content.tabs.activate.event';
   this.$get = (function(_this) {
     return function() {
       return {
-        activateEvent: _this.activateEvent
+        activateEvent: _this.activateEvent,
+        defaultClass: _this.defaultClass
       };
     };
   })(this);

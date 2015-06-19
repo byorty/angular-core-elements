@@ -291,13 +291,15 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
 
 
   $templateCache.put('/angular-core-elements/src/nav/content-nav.html',
-    "<ul class=\"nav\">\n" +
-    "    <li role=\"presentation\" ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
-    "        <a href=\"#\" ng-click=\"$event.preventDefault();select(item)\">{{item.name}}</a>\n" +
-    "    </li>\n" +
-    "    <li class=\"content\"></li>\n" +
-    "    <li ng-transclude></li>\n" +
-    "</ul>"
+    "<div class=\"content-nav\">\n" +
+    "    <ul class=\"nav {{class}}\">\n" +
+    "        <li role=\"presentation\" ng-repeat=\"item in items\" ng-class=\"{active: item.active}\">\n" +
+    "            <a href=\"#\" ng-click=\"$event.preventDefault();select(item)\">{{item.name}}</a>\n" +
+    "        </li>\n" +
+    "    </ul>\n" +
+    "    <div class=\"content\"></div>\n" +
+    "    <div ng-transclude></div>\n" +
+    "</div>\n"
   );
 
 

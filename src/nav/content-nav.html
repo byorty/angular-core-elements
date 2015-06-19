@@ -1,7 +1,9 @@
-<ul class="nav">
-    <li role="presentation" ng-repeat="item in items" ng-class="{active: item.active}">
-        <a href="#" ng-click="$event.preventDefault();select(item)">{{item.name}}</a>
-    </li>
-    <li class="content"></li>
-    <li ng-transclude></li>
-</ul>
+<div class="content-nav">
+    <ul class="nav {{class}}">
+        <li role="presentation" ng-repeat="item in items" ng-class="{active: item.active}">
+            <a href="#" ng-click="$event.preventDefault();select(item)">{{item.name}}</a>
+        </li>
+    </ul>
+    <div class="content"></div>
+    <div ng-transclude></div>
+</div>
