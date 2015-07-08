@@ -143,8 +143,12 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "<div class=\"form-group\">\n" +
     "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
     "    <span>\n" +
-    "        <core-dropdown items=\"items\" select-event=\"{{selectEvent}}\" has-any=\"true\" any-name=\"{{anyName}}\"></core-dropdown>\n" +
-    "        <input type=\"hidden\" name=\"{{name}}\" value=\"{{value.id}}\"/>\n" +
+    "        <core-dropdown items=\"items\"\n" +
+    "                       selected=\"selected\"\n" +
+    "                       select-event=\"{{selectEvent}}\"\n" +
+    "                       has-any=\"true\"\n" +
+    "                       any-name=\"{{anyName}}\"></core-dropdown>\n" +
+    "        <input type=\"hidden\" name=\"{{name}}\" value=\"{{selected.id}}\"/>\n" +
     "    </span>\n" +
     "</div>"
   );
@@ -203,8 +207,12 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "<div class=\"form-group\">\n" +
     "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
     "    <div class=\"{{wrpClass}}\">\n" +
-    "        <core-dropdown items=\"items\" select-event=\"{{selectEvent}}\"></core-dropdown>\n" +
-    "        <input type=\"hidden\" name=\"{{name}}\" value=\"{{value.id}}\"/>\n" +
+    "        <core-dropdown items=\"items\"\n" +
+    "                       selected=\"selected\"\n" +
+    "                       select-event=\"{{selectEvent}}\"\n" +
+    "                       has-any=\"true\"\n" +
+    "                       any-name=\"{{anyName}}\"></core-dropdown>\n" +
+    "        <input type=\"hidden\" name=\"{{name}}\" value=\"{{selected.id}}\"/>\n" +
     "    </div>\n" +
     "</div>"
   );

@@ -38,7 +38,7 @@ angular
                             $scope.search = null if $scope.search? and !$scope.search.length
                             if $scope.changeUrl
                                 $location.search($scope.queryName, $scope.search)
-                                $location.search('page', null)
+                                $location.search('page', null) if $scope.search?
                         $scope.delay
                     )
             )

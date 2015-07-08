@@ -194,7 +194,7 @@ angular
         require: '^coreForm'
         restrict: 'E'
         replace: true
-        templateUrl: ($element, $attrs) ->
+        templateUrl: ($element) ->
             if $element.parent().hasClass('form-horizontal')
                 '/angular-core-elements/src/form/wrapped-select.html'
             else '/angular-core-elements/src/form/select.html'
@@ -202,29 +202,11 @@ angular
             throw new Error('name should be defined') unless $scope.name?
             $scope.selectEvent = "#{$scope.name}.dropdown.select"
             $scope.anyName = 'Выбрать' unless $scope.anyName?
-            value = 0
-
-            $scope.$watch(
-                'selected'
-                (newSelected, oldSelected) ->
-                    $scope.$$childHead.select($scope.selected) if newSelected?
-            )
-
-            $scope.$watch(
-                'selectedId'
-                (newSelected, oldSelected) ->
-                    $scope.$$childHead.selectById($scope.selectedId) if newSelected?
-            )
-
-            $scope.$on(
-                $scope.selectEvent
-                (_, selected) -> value = selected?.id
-            )
 
             $ctrl.addListener(
                 $ctrl.getSendEvent()
                 $scope.name
-                (params) -> params[$scope.name] = value
+                (params) -> params[$scope.name] = $scope.selected.id
             )
     ])
     .directive('coreTextarea', [ ->

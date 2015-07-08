@@ -19,7 +19,7 @@ angular
         restrict: 'E'
         replace: true
         templateUrl: '/angular-core-elements/src/dropdown/dropdown.html'
-        controller: ['$scope', '$element', ($scope, $element) ->
+        controller: ['$scope', '$element', '$attrs', ($scope, $element, $attrs) ->
             ANY_VALUE = '__ANY__'
             $scope.isOpen = false
             $scope.changeUrl = ngCoreDropdown.changeUrl unless $scope.changeUrl?
@@ -51,7 +51,9 @@ angular
 
             $scope.$watch(
                 'selected'
-                (newSelected, oldSelected) -> $scope.select($scope.selected) if newSelected isnt oldSelected and $scope.selected
+                (newSelected, oldSelected) ->
+                    $scope.select($scope.selected) if newSelected isnt oldSelected and $scope.selected
+                true
             )
 
             $scope.$on(
@@ -70,7 +72,7 @@ angular
                     $scope.select($scope.selected)
                 else if $scope.queryName? and search[$scope.queryName]?
                     $scope.selectById(parseInt(search[$scope.queryName]))
-                else
+                else unless $attrs.selected?
                     $scope.select($scope.items[0])
                 $scope.changeUrlOnStart = true if hasItems()
 

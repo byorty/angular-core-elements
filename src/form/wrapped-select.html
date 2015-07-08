@@ -1,7 +1,11 @@
 <div class="form-group">
     <label ng-if="label" class="{{lblClass}}">{{label}}</label>
     <div class="{{wrpClass}}">
-        <core-dropdown items="items" select-event="{{selectEvent}}"></core-dropdown>
-        <input type="hidden" name="{{name}}" value="{{value.id}}"/>
+        <core-dropdown items="items"
+                       selected="selected"
+                       select-event="{{selectEvent}}"
+                       has-any="true"
+                       any-name="{{anyName}}"></core-dropdown>
+        <input type="hidden" name="{{name}}" value="{{selected.id}}"/>
     </div>
 </div>

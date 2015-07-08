@@ -946,7 +946,7 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
             if (newSelected !== oldSelected && $scope.selected) {
               return $scope.select($scope.selected);
             }
-          });
+          }, true);
           $scope.$on('body.click', function(event, args) {
             if ($scope.isOpen && !$element[0].contains(args.target)) {
               return $scope.isOpen = false;
@@ -963,7 +963,7 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
             } else if (($scope.queryName != null) && (search[$scope.queryName] != null)) {
               $scope.selectById(parseInt(search[$scope.queryName]));
             } else {
-              $scope.select($scope.items[0]);
+
             }
             if (hasItems()) {
               return $scope.changeUrlOnStart = true;
@@ -1292,7 +1292,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       require: '^coreForm',
       restrict: 'E',
       replace: true,
-      templateUrl: function($element, $attrs) {
+      templateUrl: function($element) {
         if ($element.parent().hasClass('form-horizontal')) {
           return '/angular-core-elements/src/form/wrapped-select.html';
         } else {
@@ -1300,7 +1300,6 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         }
       },
       link: function($scope, $element, $attrs, $ctrl) {
-        var value;
         if ($scope.name == null) {
           throw new Error('name should be defined');
         }
@@ -1308,22 +1307,8 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         if ($scope.anyName == null) {
           $scope.anyName = 'Выбрать';
         }
-        value = 0;
-        $scope.$watch('selected', function(newSelected, oldSelected) {
-          if (newSelected != null) {
-            return $scope.$$childHead.select($scope.selected);
-          }
-        });
-        $scope.$watch('selectedId', function(newSelected, oldSelected) {
-          if (newSelected != null) {
-            return $scope.$$childHead.selectById($scope.selectedId);
-          }
-        });
-        $scope.$on($scope.selectEvent, function(_, selected) {
-          return value = selected != null ? selected.id : void 0;
-        });
         return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
-          return params[$scope.name] = value;
+          return params[$scope.name] = $scope.selected.id;
         });
       }
     };
@@ -1528,7 +1513,9 @@ angular.module('ngCoreElementPanel', []).directive('corePanel', [
               }
               if ($scope.changeUrl) {
                 $location.search($scope.queryName, $scope.search);
-                return $location.search('page', null);
+                if ($scope.search != null) {
+                  return $location.search('page', null);
+                }
               }
             }, $scope.delay);
           });
@@ -1597,11 +1584,14 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
             $scope.itemsNotFound = 'Нет данных для отображения';
           }
           parentScope = $scope;
-          $scope.$on('pagination', function(event, pagination) {
-            $scope.itemsPerPage = pagination.itemsPerPage;
-            $scope.itemsCount = pagination.itemsCount;
-            return $scope.createPages();
-          });
+          if ($scope.changeUrl) {
+            $scope.$on('pagination', function(event, pagination) {
+              $scope.currentPage = pagination.page;
+              $scope.itemsPerPage = pagination.itemsPerPage;
+              $scope.itemsCount = pagination.itemsCount;
+              return $scope.createPages();
+            });
+          }
           $scope.selectPage = function(page) {
             $scope.currentPage = page;
             $scope.createPages();

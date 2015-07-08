@@ -30,11 +30,13 @@ angular
             $scope.itemsNotFound = 'Нет данных для отображения' unless $scope.itemsNotFound?
             parentScope = $scope
 
-            $scope.$on('pagination', (event, pagination) ->
-                $scope.itemsPerPage = pagination.itemsPerPage
-                $scope.itemsCount = pagination.itemsCount
-                $scope.createPages()
-            )
+            if $scope.changeUrl
+                $scope.$on('pagination', (event, pagination) ->
+                    $scope.currentPage = pagination.page
+                    $scope.itemsPerPage = pagination.itemsPerPage
+                    $scope.itemsCount = pagination.itemsCount
+                    $scope.createPages()
+                )
 
             $scope.selectPage = (page) ->
                 $scope.currentPage = page
