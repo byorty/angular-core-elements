@@ -884,7 +884,7 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
       replace: true,
       templateUrl: '/angular-core-elements/src/dropdown/dropdown.html',
       controller: [
-        '$scope', '$element', function($scope, $element) {
+        '$scope', '$element', '$attrs', function($scope, $element, $attrs) {
           var ANY_VALUE, hasItems, selectDefault, updateItems;
           ANY_VALUE = '__ANY__';
           $scope.isOpen = false;
@@ -962,8 +962,8 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
               $scope.select($scope.selected);
             } else if (($scope.queryName != null) && (search[$scope.queryName] != null)) {
               $scope.selectById(parseInt(search[$scope.queryName]));
-            } else {
-
+            } else if (angular.isUndefined($attrs.selected)) {
+              $scope.select($scope.items[0]);
             }
             if (hasItems()) {
               return $scope.changeUrlOnStart = true;
