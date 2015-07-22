@@ -972,7 +972,7 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
               $scope.select($scope.selected);
             } else if (($scope.queryName != null) && (search[$scope.queryName] != null)) {
               $scope.selectById(parseInt(search[$scope.queryName]));
-            } else if ($attrs.selected == null) {
+            } else if (angular.isUndefined($attrs.selected)) {
               $scope.select($scope.items[0]);
             }
             if (hasItems()) {
