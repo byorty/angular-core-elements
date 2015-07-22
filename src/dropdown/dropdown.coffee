@@ -72,7 +72,7 @@ angular
                     $scope.select($scope.selected)
                 else if $scope.queryName? and search[$scope.queryName]?
                     $scope.selectById(parseInt(search[$scope.queryName]))
-                else unless $attrs.selected?
+                else if angular.isUndefined($attrs.selected)
                     $scope.select($scope.items[0])
                 $scope.changeUrlOnStart = true if hasItems()
 
