@@ -1,7 +1,9 @@
-<div class="form-group autocomplete" >
-    <label class="control-label {{lblClass}}" ng-if="label">{{label}}</label>
+<div class="form-group">
+    <label ng-if="label" class="{{lblClass}}">{{label}}</label>
     <div class="autocomplete-group {{wrpClass}}" ng-class="{open: isOpen}">
         <input type="text"
+               name="{{name}}"
+               value="{{value}}"
                ng-model="search"
                ng-change="onChange(search)"
                class="form-control"

@@ -1,6 +1,6 @@
 angular
     .module('ngCoreElementAutocomplete', [])
-    .directive('coreAutocomplete', ['$service', '$timeout', '$location', 'ngCoreAutocomplete', ($service, $timeout, $location, ngCoreAutocomplete) ->
+    .directive('coreAutocomplete', ['$service', '$timeout', '$location', '$parse', 'ngCoreAutocomplete', ($service, $timeout, $location, $parse, ngCoreAutocomplete) ->
         scope:
             service: '@'
             params: '=?'
@@ -13,9 +13,12 @@ angular
             wrpClass: '@'
             placeholder: '@'
             delay: '=?'
+            onSelect: '&'
         restrict: 'E'
         replace: true
-        templateUrl: '/angular-core-elements/src/autocomplete/autocomplete.html'
+        templateUrl: ($element, $attrs) ->
+            if $attrs['templateUrl']? $attrs['templateUrl']
+            else '/angular-core-elements/src/autocomplete/autocomplete.html'
         controller: ['$scope', '$element', ($scope, $element) ->
             throw new Error('service should be defined') unless $scope.service?
             $scope.params = ngCoreAutocomplete.params unless $scope.params?
@@ -23,12 +26,9 @@ angular
             $scope.queryName = ngCoreAutocomplete.queryName unless $scope.queryName?
             $scope.paramName = ngCoreAutocomplete.paramName unless $scope.paramName?
             $scope.delay = ngCoreAutocomplete.delay unless $scope.delay?
-#            $scope.search = if $scope.value? then $scope.value else null
-#            $scope.search = $scope.value
             $scope.isOpen = false
             $scope.items = null
             isSelect = false
-
 
             promise = null
             $scope.$watch(
@@ -72,11 +72,12 @@ angular
             )
 
             $scope.onSearch = (search) -> $scope.search = search
-            $scope.onSelect = (item) ->
+            $scope.onBaseSelect = (item) ->
                 isSelect = true
                 $scope.isOpen = false
                 $scope.search = item.name
                 $location.search($scope.queryName, item.id) if $scope.changeUrl
+                $scope.onSelect()(item) if $scope.onSelect?
         ]
     ])
     .provider('ngCoreAutocomplete', ->

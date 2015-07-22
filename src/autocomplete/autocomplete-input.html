@@ -1,0 +1,15 @@
+<div class="form-group">
+    <label ng-if="label" class="{{lblClass}}">{{label}}</label>
+    <input type="text"
+           name="{{name}}"
+           value="{{value}}"
+           ng-model="search"
+           ng-change="onChange(search)"
+           class="form-control"
+           placeholder="{{placeholder}}"/>
+    <ul class="dropdown-menu {{align}}" role="menu">
+        <li ng-repeat="item in items">
+            <a ng-href="#" ng-click="$event.preventDefault();onBaseSelect(item)">{{item.name}}</a>
+        </li>
+    </ul>
+</div>

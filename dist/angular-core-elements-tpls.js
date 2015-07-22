@@ -2,9 +2,28 @@
 angular.module('ngCoreElements').run(['$templateCache', function($templateCache) {
   'use strict';
 
+  $templateCache.put('/angular-core-elements/src/autocomplete/autocomplete-input.html',
+    "<div class=\"form-group\">\n" +
+    "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
+    "    <input type=\"text\"\n" +
+    "           name=\"{{name}}\"\n" +
+    "           value=\"{{value}}\"\n" +
+    "           ng-model=\"search\"\n" +
+    "           ng-change=\"onChange(search)\"\n" +
+    "           class=\"form-control\"\n" +
+    "           placeholder=\"{{placeholder}}\"/>\n" +
+    "    <ul class=\"dropdown-menu {{align}}\" role=\"menu\">\n" +
+    "        <li ng-repeat=\"item in items\">\n" +
+    "            <a ng-href=\"#\" ng-click=\"$event.preventDefault();onBaseSelect(item)\">{{item.name}}</a>\n" +
+    "        </li>\n" +
+    "    </ul>\n" +
+    "</div>"
+  );
+
+
   $templateCache.put('/angular-core-elements/src/autocomplete/autocomplete.html',
     "<div class=\"form-group autocomplete\" >\n" +
-    "    <label class=\"control-label\" ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
+    "    <label class=\"control-label {{lblClass}}\" ng-if=\"label\">{{label}}</label>\n" +
     "    <div class=\"autocomplete-group {{wrpClass}}\" ng-class=\"{open: isOpen}\">\n" +
     "        <input type=\"text\"\n" +
     "               ng-model=\"search\"\n" +
@@ -13,7 +32,28 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "               placeholder=\"{{placeholder}}\"/>\n" +
     "        <ul class=\"dropdown-menu {{align}}\" role=\"menu\">\n" +
     "            <li ng-repeat=\"item in items\">\n" +
-    "                <a ng-href=\"#\" ng-click=\"$event.preventDefault();onSelect(item)\">{{item.name}}</a>\n" +
+    "                <a ng-href=\"#\" ng-click=\"$event.preventDefault();onBaseSelect(item)\">{{item.name}}</a>\n" +
+    "            </li>\n" +
+    "        </ul>\n" +
+    "    </div>\n" +
+    "</div>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/autocomplete/wrapped-autocomplete-input.html',
+    "<div class=\"form-group\">\n" +
+    "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
+    "    <div class=\"autocomplete-group {{wrpClass}}\" ng-class=\"{open: isOpen}\">\n" +
+    "        <input type=\"text\"\n" +
+    "               name=\"{{name}}\"\n" +
+    "               value=\"{{value}}\"\n" +
+    "               ng-model=\"search\"\n" +
+    "               ng-change=\"onChange(search)\"\n" +
+    "               class=\"form-control\"\n" +
+    "               placeholder=\"{{placeholder}}\"/>\n" +
+    "        <ul class=\"dropdown-menu {{align}}\" role=\"menu\">\n" +
+    "            <li ng-repeat=\"item in items\">\n" +
+    "                <a ng-href=\"#\" ng-click=\"$event.preventDefault();onBaseSelect(item)\">{{item.name}}</a>\n" +
     "            </li>\n" +
     "        </ul>\n" +
     "    </div>\n" +
@@ -99,6 +139,36 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "        <input type=\"hidden\" name=\"{{name}}\" value=\"{{value}}\" ng-if=\"name\"/>\n" +
     "    </div>\n" +
     "</div>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/form/autocomplete-input.html',
+    "<div class=\"autocomplete-input-wrapper\">\n" +
+    "    <core-autocomplete\n" +
+    "                       service=\"{{service}}\"\n" +
+    "                       name=\"{{name}}\"\n" +
+    "                       value=\"item\"\n" +
+    "                       label=\"{{label}}\"\n" +
+    "                       lbl-class=\"{{lblClass}}\"\n" +
+    "                       placeholder=\"{{placeholder}}\"\n" +
+    "                       wrp-class=\"{{wrpClass}}\"\n" +
+    "                       on-select=\"onSelect\"\n" +
+    "                       template-url=\"{{templateUrl}}\"></core-autocomplete>\n" +
+    "    <div class=\"form-group values\" ng-repeat=\"item in items\" ng-if=\"multiple\">\n" +
+    "        <div ng-if=\"label\" class=\"{{lblClass}}\"></div>\n" +
+    "        <div class=\"{{wrpClass}}\">\n" +
+    "            <a href=\"#\" class=\"remove-btn\" ng-click=\"$event.preventDefault();remove(item)\">\n" +
+    "                <i class=\"fa fa-times\"></i>\n" +
+    "            </a>\n" +
+    "            <input type=\"text\"\n" +
+    "                   value=\"{{item.name}}\"\n" +
+    "                   class=\"form-control\"\n" +
+    "                   placeholder=\"{{placeholder}}\"/>\n" +
+    "            <input type=\"hidden\"\n" +
+    "                   value=\"{{item.id}}\"/>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n"
   );
 
 

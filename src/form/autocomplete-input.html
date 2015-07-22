@@ -1,0 +1,26 @@
+<div class="autocomplete-input-wrapper">
+    <core-autocomplete
+                       service="{{service}}"
+                       name="{{name}}"
+                       value="item"
+                       label="{{label}}"
+                       lbl-class="{{lblClass}}"
+                       placeholder="{{placeholder}}"
+                       wrp-class="{{wrpClass}}"
+                       on-select="onSelect"
+                       template-url="{{templateUrl}}"></core-autocomplete>
+    <div class="form-group values" ng-repeat="item in items" ng-if="multiple">
+        <div ng-if="label" class="{{lblClass}}"></div>
+        <div class="{{wrpClass}}">
+            <a href="#" class="remove-btn" ng-click="$event.preventDefault();remove(item)">
+                <i class="fa fa-times"></i>
+            </a>
+            <input type="text"
+                   value="{{item.name}}"
+                   class="form-control"
+                   placeholder="{{placeholder}}"/>
+            <input type="hidden"
+                   value="{{item.id}}"/>
+        </div>
+    </div>
+</div>

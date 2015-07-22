@@ -274,3 +274,58 @@ angular
                 (params) -> params[$scope.name] = $scope.value
             )
     ])
+    .directive('coreAutocompleteInput', [ ->
+        scope:
+            service: '@'
+            name: '@'
+            label: '@'
+            lblClass: '@'
+            placeholder: '@'
+            wrpClass: '@'
+            multiple: '@'
+            items: '=?values'
+            item: '=?value'
+        require: '^coreForm'
+        restrict: 'E'
+        replace: true
+        templateUrl: '/angular-core-elements/src/form/autocomplete-input.html'
+        link: ($scope, $element, $attrs, $ctrl) ->
+            throw new Error('name should be defined') unless $scope.name?
+            $scope.hasWrapper = $element.parent().hasClass('form-horizontal');
+            $scope.multiple = false unless $scope.multiple?
+            $scope.templateUrl = if $scope.hasWrapper then '/angular-core-elements/src/autocomplete/autocomplete-input.html' else '/angular-core-elements/src/autocomplete/wrapped-autocomplete-input.html'
+
+            find = (item) ->
+                result = null
+                if not $scope.items.length
+                    return result
+                for i in [0..$scope.items.length-1]
+                    if $scope.items[i].id == item.id
+                        result =
+                            num: i
+                            item: item
+                        break
+                return result
+
+            $scope.onSelect = (item) ->
+                if $scope.multiple
+                    if !find(item)
+                        $scope.items.push(item)
+                    $scope.$$childHead.search = null
+                else $scope.item = item
+
+            $scope.remove = (item) ->
+                result = find(item)
+                if result?
+                    $scope.items.splice(result.num, 1)
+
+            $ctrl.addListener(
+                $ctrl.getSendEvent()
+                $scope.name
+                (params) ->
+                    if $scope.multiple
+                        params[$scope.name] = for i in [0..$scope.items.length-1]
+                            $scope.items[i].id
+                    else params[$scope.name] = $scope.item.id
+            )
+    ])

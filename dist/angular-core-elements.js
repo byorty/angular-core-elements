@@ -310,7 +310,7 @@ Date.replaceCharsLocale = {
 };
 
 angular.module('ngCoreElementAutocomplete', []).directive('coreAutocomplete', [
-  '$service', '$timeout', '$location', 'ngCoreAutocomplete', function($service, $timeout, $location, ngCoreAutocomplete) {
+  '$service', '$timeout', '$location', '$parse', 'ngCoreAutocomplete', function($service, $timeout, $location, $parse, ngCoreAutocomplete) {
     return {
       scope: {
         service: '@',
@@ -323,11 +323,18 @@ angular.module('ngCoreElementAutocomplete', []).directive('coreAutocomplete', [
         lblClass: '@',
         wrpClass: '@',
         placeholder: '@',
-        delay: '=?'
+        delay: '=?',
+        onSelect: '&'
       },
       restrict: 'E',
       replace: true,
-      templateUrl: '/angular-core-elements/src/autocomplete/autocomplete.html',
+      templateUrl: function($element, $attrs) {
+        if (typeof $attrs['templateUrl'] === "function" ? $attrs['templateUrl']($attrs['templateUrl']) : void 0) {
+
+        } else {
+          return '/angular-core-elements/src/autocomplete/autocomplete.html';
+        }
+      },
       controller: [
         '$scope', '$element', function($scope, $element) {
           var isSelect, promise;
@@ -393,12 +400,15 @@ angular.module('ngCoreElementAutocomplete', []).directive('coreAutocomplete', [
           $scope.onSearch = function(search) {
             return $scope.search = search;
           };
-          return $scope.onSelect = function(item) {
+          return $scope.onBaseSelect = function(item) {
             isSelect = true;
             $scope.isOpen = false;
             $scope.search = item.name;
             if ($scope.changeUrl) {
-              return $location.search($scope.queryName, item.id);
+              $location.search($scope.queryName, item.id);
+            }
+            if ($scope.onSelect != null) {
+              return $scope.onSelect()(item);
             }
           };
         }
@@ -884,7 +894,7 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
       replace: true,
       templateUrl: '/angular-core-elements/src/dropdown/dropdown.html',
       controller: [
-        '$scope', '$element', function($scope, $element) {
+        '$scope', '$element', '$attrs', function($scope, $element, $attrs) {
           var ANY_VALUE, hasItems, selectDefault, updateItems;
           ANY_VALUE = '__ANY__';
           $scope.isOpen = false;
@@ -962,8 +972,8 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
               $scope.select($scope.selected);
             } else if (($scope.queryName != null) && (search[$scope.queryName] != null)) {
               $scope.selectById(parseInt(search[$scope.queryName]));
-            } else {
-
+            } else if ($attrs.selected == null) {
+              $scope.select($scope.items[0]);
             }
             if (hasItems()) {
               return $scope.changeUrlOnStart = true;
@@ -1385,6 +1395,86 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         }
         return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
           return params[$scope.name] = $scope.value;
+        });
+      }
+    };
+  }
+]).directive('coreAutocompleteInput', [
+  function() {
+    return {
+      scope: {
+        service: '@',
+        name: '@',
+        label: '@',
+        lblClass: '@',
+        placeholder: '@',
+        wrpClass: '@',
+        multiple: '@',
+        items: '=?values',
+        item: '=?value'
+      },
+      require: '^coreForm',
+      restrict: 'E',
+      replace: true,
+      templateUrl: '/angular-core-elements/src/form/autocomplete-input.html',
+      link: function($scope, $element, $attrs, $ctrl) {
+        var find;
+        if ($scope.name == null) {
+          throw new Error('name should be defined');
+        }
+        $scope.hasWrapper = $element.parent().hasClass('form-horizontal');
+        if ($scope.multiple == null) {
+          $scope.multiple = false;
+        }
+        $scope.templateUrl = $scope.hasWrapper ? '/angular-core-elements/src/autocomplete/autocomplete-input.html' : '/angular-core-elements/src/autocomplete/wrapped-autocomplete-input.html';
+        find = function(item) {
+          var i, k, ref, result;
+          result = null;
+          if (!$scope.items.length) {
+            return result;
+          }
+          for (i = k = 0, ref = $scope.items.length - 1; 0 <= ref ? k <= ref : k >= ref; i = 0 <= ref ? ++k : --k) {
+            if ($scope.items[i].id === item.id) {
+              result = {
+                num: i,
+                item: item
+              };
+              break;
+            }
+          }
+          return result;
+        };
+        $scope.onSelect = function(item) {
+          if ($scope.multiple) {
+            if (!find(item)) {
+              $scope.items.push(item);
+            }
+            return $scope.$$childHead.search = null;
+          } else {
+            return $scope.item = item;
+          }
+        };
+        $scope.remove = function(item) {
+          var result;
+          result = find(item);
+          if (result != null) {
+            return $scope.items.splice(result.num, 1);
+          }
+        };
+        return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
+          var i;
+          if ($scope.multiple) {
+            return params[$scope.name] = (function() {
+              var k, ref, results;
+              results = [];
+              for (i = k = 0, ref = $scope.items.length - 1; 0 <= ref ? k <= ref : k >= ref; i = 0 <= ref ? ++k : --k) {
+                results.push($scope.items[i].id);
+              }
+              return results;
+            })();
+          } else {
+            return params[$scope.name] = $scope.item.id;
+          }
         });
       }
     };
