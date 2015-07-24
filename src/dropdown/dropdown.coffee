@@ -72,12 +72,12 @@ angular
                     $scope.select($scope.selected)
                 else if $scope.queryName? and search[$scope.queryName]?
                     $scope.selectById(parseInt(search[$scope.queryName]))
-                else if angular.isUndefined($attrs.selected)
+                else if angular.isUndefined($attrs.selected) or (not angular.isUndefined($attrs.selected) and angular.isUndefined($scope.selected))
                     $scope.select($scope.items[0])
                 $scope.changeUrlOnStart = true if hasItems()
 
             updateItems = ->
-                if $scope.hasAny
+                if $scope.hasAny and $scope.items[0]?.id != ANY_VALUE
                     $timeout( ->
                         $scope.items.unshift(
                             id: ANY_VALUE

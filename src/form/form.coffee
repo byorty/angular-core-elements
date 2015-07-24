@@ -99,7 +99,7 @@ angular
         restrict: 'E'
         replace: true
         templateUrl: ($element, $attrs) ->
-            if $element.parent().hasClass('form-horizontal')
+            if $attrs.wrpClass?
                 '/angular-core-elements/src/form/wrapped-input.html'
             else '/angular-core-elements/src/form/input.html'
         link: ($scope, $element, $attrs, $ctrl) ->
@@ -155,7 +155,7 @@ angular
         replace: true
         transclude: true
         templateUrl: ($element, $attrs) ->
-            if $element.parent().hasClass('form-horizontal')
+            if $attrs.wrpClass?
                 '/angular-core-elements/src/form/wrapped-submit.html'
             else '/angular-core-elements/src/form/submit.html'
         link: ($scope, $element, $attrs, $ctrl) ->
@@ -181,7 +181,7 @@ angular
             btnClass: btnClass
         @
     )
-    .directive('coreSelect', [ ->
+    .directive('coreSelect', ['$timeout', ($timeout) ->
         scope:
             name: '@'
             label: '@'
@@ -194,14 +194,24 @@ angular
         require: '^coreForm'
         restrict: 'E'
         replace: true
-        templateUrl: ($element) ->
-            if $element.parent().hasClass('form-horizontal')
+        templateUrl: ($element, $attrs) ->
+            if $attrs.wrpClass?
                 '/angular-core-elements/src/form/wrapped-select.html'
             else '/angular-core-elements/src/form/select.html'
         link: ($scope, $element, $attrs, $ctrl) ->
             throw new Error('name should be defined') unless $scope.name?
-            $scope.selectEvent = "#{$scope.name}.dropdown.select"
+            $scope.selectEvent = "#{$scope.name}.select"
             $scope.anyName = 'Выбрать' unless $scope.anyName?
+
+            $scope.$watch(
+                'selectedId',
+                ->
+                    if angular.isUndefined($scope.selected) and not angular.isUndefined($scope.selectedId)
+                        for i in [0..$scope.items.length-1]
+                            if $scope.selectedId == $scope.items[i].id
+                                $scope.selected = $scope.items[i]
+                                break
+            )
 
             $ctrl.addListener(
                 $ctrl.getSendEvent()
@@ -223,7 +233,7 @@ angular
         restrict: 'E'
         replace: true
         templateUrl: ($element, $attrs) ->
-            if $element.parent().hasClass('form-horizontal')
+            if $attrs.wrpClass?
                 '/angular-core-elements/src/form/wrapped-textarea.html'
             else '/angular-core-elements/src/form/textarea.html'
         link: ($scope, $element, $attrs, $ctrl) ->
@@ -262,7 +272,7 @@ angular
         restrict: 'E'
         replace: true
         templateUrl: ($element, $attrs) ->
-            if $element.parent().hasClass('form-horizontal')
+            if $attrs.wrpClass?
                 '/angular-core-elements/src/form/wrapped-checkbox.html'
             else '/angular-core-elements/src/form/checkbox.html'
         link: ($scope, $element, $attrs, $ctrl) ->
@@ -271,7 +281,7 @@ angular
             $ctrl.addListener(
                 $ctrl.getSendEvent()
                 $scope.name
-                (params) -> params[$scope.name] = $scope.value
+                (params) -> params[$scope.name] = $scope.value if $scope.checked
             )
     ])
     .directive('coreAutocompleteInput', [ ->
@@ -291,7 +301,7 @@ angular
         templateUrl: '/angular-core-elements/src/form/autocomplete-input.html'
         link: ($scope, $element, $attrs, $ctrl) ->
             throw new Error('name should be defined') unless $scope.name?
-            $scope.hasWrapper = $element.parent().hasClass('form-horizontal');
+            $scope.hasWrapper = $attrs.wrpClass?;
             $scope.multiple = false unless $scope.multiple?
             $scope.templateUrl = if $scope.hasWrapper then '/angular-core-elements/src/autocomplete/autocomplete-input.html' else '/angular-core-elements/src/autocomplete/wrapped-autocomplete-input.html'
 
