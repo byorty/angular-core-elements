@@ -972,7 +972,7 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
               $scope.select($scope.selected);
             } else if (($scope.queryName != null) && (search[$scope.queryName] != null)) {
               $scope.selectById(parseInt(search[$scope.queryName]));
-            } else if (angular.isUndefined($attrs.selected)) {
+            } else if (angular.isUndefined($attrs.selected) || (!angular.isUndefined($attrs.selected) && angular.isUndefined($scope.selected))) {
               $scope.select($scope.items[0]);
             }
             if (hasItems()) {
@@ -980,7 +980,8 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
             }
           };
           updateItems = function() {
-            if ($scope.hasAny) {
+            var ref;
+            if ($scope.hasAny && ((ref = $scope.items[0]) != null ? ref.id : void 0) !== ANY_VALUE) {
               return $timeout(function() {
                 $scope.items.unshift({
                   id: ANY_VALUE,
@@ -1183,7 +1184,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       restrict: 'E',
       replace: true,
       templateUrl: function($element, $attrs) {
-        if ($element.parent().hasClass('form-horizontal')) {
+        if ($attrs.wrpClass != null) {
           return '/angular-core-elements/src/form/wrapped-input.html';
         } else {
           return '/angular-core-elements/src/form/input.html';
@@ -1256,7 +1257,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       replace: true,
       transclude: true,
       templateUrl: function($element, $attrs) {
-        if ($element.parent().hasClass('form-horizontal')) {
+        if ($attrs.wrpClass != null) {
           return '/angular-core-elements/src/form/wrapped-submit.html';
         } else {
           return '/angular-core-elements/src/form/submit.html';
@@ -1287,7 +1288,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
   };
   return this;
 }).directive('coreSelect', [
-  function() {
+  '$timeout', function($timeout) {
     return {
       scope: {
         name: '@',
@@ -1302,8 +1303,8 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       require: '^coreForm',
       restrict: 'E',
       replace: true,
-      templateUrl: function($element) {
-        if ($element.parent().hasClass('form-horizontal')) {
+      templateUrl: function($element, $attrs) {
+        if ($attrs.wrpClass != null) {
           return '/angular-core-elements/src/form/wrapped-select.html';
         } else {
           return '/angular-core-elements/src/form/select.html';
@@ -1313,10 +1314,25 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         if ($scope.name == null) {
           throw new Error('name should be defined');
         }
-        $scope.selectEvent = $scope.name + ".dropdown.select";
+        $scope.selectEvent = $scope.name + ".select";
         if ($scope.anyName == null) {
           $scope.anyName = 'Выбрать';
         }
+        $scope.$watch('selectedId', function() {
+          var i, k, ref, results;
+          if (angular.isUndefined($scope.selected) && !angular.isUndefined($scope.selectedId)) {
+            results = [];
+            for (i = k = 0, ref = $scope.items.length - 1; 0 <= ref ? k <= ref : k >= ref; i = 0 <= ref ? ++k : --k) {
+              if ($scope.selectedId === $scope.items[i].id) {
+                $scope.selected = $scope.items[i];
+                break;
+              } else {
+                results.push(void 0);
+              }
+            }
+            return results;
+          }
+        });
         return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
           return params[$scope.name] = $scope.selected.id;
         });
@@ -1340,7 +1356,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       restrict: 'E',
       replace: true,
       templateUrl: function($element, $attrs) {
-        if ($element.parent().hasClass('form-horizontal')) {
+        if ($attrs.wrpClass != null) {
           return '/angular-core-elements/src/form/wrapped-textarea.html';
         } else {
           return '/angular-core-elements/src/form/textarea.html';
@@ -1383,7 +1399,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       restrict: 'E',
       replace: true,
       templateUrl: function($element, $attrs) {
-        if ($element.parent().hasClass('form-horizontal')) {
+        if ($attrs.wrpClass != null) {
           return '/angular-core-elements/src/form/wrapped-checkbox.html';
         } else {
           return '/angular-core-elements/src/form/checkbox.html';
@@ -1394,7 +1410,9 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
           throw new Error('name should be defined');
         }
         return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
-          return params[$scope.name] = $scope.value;
+          if ($scope.checked) {
+            return params[$scope.name] = $scope.value;
+          }
         });
       }
     };
@@ -1422,7 +1440,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         if ($scope.name == null) {
           throw new Error('name should be defined');
         }
-        $scope.hasWrapper = $element.parent().hasClass('form-horizontal');
+        $scope.hasWrapper = $attrs.wrpClass != null;
         if ($scope.multiple == null) {
           $scope.multiple = false;
         }
