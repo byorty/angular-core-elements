@@ -1,0 +1,8 @@
+<div class="form-group">
+    <label ng-if="label" class="{{lblClass}}">{{label}}</label>
+    <div class="{{wrpClass}}">
+        <label ng-class="{'radio-inline': inline}" ng-repeat="item in items">
+            <input type="radio" name="{{name}}" value="{{item.id}}">{{item.name}}
+        </label>
+    </div>
+</div>

@@ -209,6 +209,18 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
   );
 
 
+  $templateCache.put('/angular-core-elements/src/form/radio.html',
+    "<div class=\"form-group\">\n" +
+    "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
+    "    <label ng-repeat=\"item in items\">\n" +
+    "        <input type=\"radio\"\n" +
+    "               name=\"{{name}}\"\n" +
+    "               value=\"{{item.id}}\"/>{{item.name}}\n" +
+    "    </label>\n" +
+    "</div>"
+  );
+
+
   $templateCache.put('/angular-core-elements/src/form/select.html',
     "<div class=\"form-group\">\n" +
     "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
@@ -268,6 +280,18 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "               value=\"{{value}}\"\n" +
     "               class=\"form-control\"\n" +
     "               placeholder=\"{{placeholder}}\"/>\n" +
+    "    </div>\n" +
+    "</div>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/form/wrapped-radio.html',
+    "<div class=\"form-group\">\n" +
+    "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
+    "    <div class=\"{{wrpClass}}\">\n" +
+    "        <label ng-class=\"{'radio-inline': inline}\" ng-repeat=\"item in items\">\n" +
+    "            <input type=\"radio\" name=\"{{name}}\" value=\"{{item.id}}\">{{item.name}}\n" +
+    "        </label>\n" +
     "    </div>\n" +
     "</div>"
   );
