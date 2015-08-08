@@ -20,7 +20,6 @@ angular
         replace: true
         templateUrl: '/angular-core-elements/src/dropdown/dropdown.html'
         controller: ['$scope', '$element', '$attrs', ($scope, $element, $attrs) ->
-            ANY_VALUE = '__ANY__'
             $scope.isOpen = false
             $scope.changeUrl = ngCoreDropdown.changeUrl unless $scope.changeUrl?
             $scope.changeUrlOnStart = ngCoreDropdown.changeUrlOnStart unless $scope.changeUrlOnStart?
@@ -34,11 +33,11 @@ angular
                 $scope.isOpen = if $scope.isOpen then false else true
 
             $scope.select = (item) ->
+                $scope.selected = item if $scope.selected?.id isnt item.id
                 $scope.isOpen = false
-                $scope.selected = item
                 $rootScope.$broadcast($scope.selectEvent, $scope.selected)
-                $location.search($scope.queryName, $scope.selected.id) if $scope.changeUrl is true and $scope.changeUrlOnStart is true and item.id isnt ANY_VALUE
-                $location.search($scope.queryName, null) if $scope.changeUrl is true and $scope.changeUrlOnStart is true and item.id is ANY_VALUE
+                $location.search($scope.queryName, $scope.selected.id) if $scope.changeUrl is true and $scope.changeUrlOnStart is true and item.id isnt ngCoreDropdown.anyValue
+                $location.search($scope.queryName, null) if $scope.changeUrl is true and $scope.changeUrlOnStart is true and item.id is ngCoreDropdown.anyValue
 
             $scope.selectById = (id) ->
                 for i, item of $scope.items
@@ -52,7 +51,7 @@ angular
             $scope.$watch(
                 'selected'
                 (newSelected, oldSelected) ->
-                    $scope.select($scope.selected) if newSelected isnt oldSelected and $scope.selected
+                    $scope.select($scope.selected) if newSelected?.id isnt oldSelected?.id and $scope.selected
                 true
             )
 
@@ -72,15 +71,15 @@ angular
                     $scope.select($scope.selected)
                 else if $scope.queryName? and search[$scope.queryName]?
                     $scope.selectById(parseInt(search[$scope.queryName]))
-                else if angular.isUndefined($attrs.selected) or (not angular.isUndefined($attrs.selected) and angular.isUndefined($scope.selected))
+                else if angular.isUndefined($attrs.selected) or (not angular.isUndefined($attrs.selected) and angular.isUndefined($scope.selected)) or !$scope.selected?
                     $scope.select($scope.items[0])
                 $scope.changeUrlOnStart = true if hasItems()
 
             updateItems = ->
-                if $scope.hasAny and $scope.items[0]?.id != ANY_VALUE
+                if $scope.hasAny and $scope.items[0]?.id != ngCoreDropdown.anyValue
                     $timeout( ->
                         $scope.items.unshift(
-                            id: ANY_VALUE
+                            id: ngCoreDropdown.anyValue
                             name: $scope.anyName
                         )
                         selectDefault()
@@ -91,6 +90,7 @@ angular
         ]
     ])
     .provider('ngCoreDropdown', ->
+        @anyValue = '__ANY__'
         @changeUrl = false
         @changeUrlOnStart = false
         @queryName = 'dropdown'
@@ -99,6 +99,7 @@ angular
         @anyName = 'Любой'
         @align = 'left'
         @$get = =>
+            anyValue: @anyValue
             changeUrl: @changeUrl
             changeUrlOnStart: @changeUrlOnStart
             queryName: @queryName

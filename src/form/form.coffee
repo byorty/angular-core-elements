@@ -181,7 +181,7 @@ angular
             btnClass: btnClass
         @
     )
-    .directive('coreSelect', ['$timeout', ($timeout) ->
+    .directive('coreSelect', ['ngCoreDropdown', (ngCoreDropdown) ->
         scope:
             name: '@'
             label: '@'
@@ -216,7 +216,8 @@ angular
             $ctrl.addListener(
                 $ctrl.getSendEvent()
                 $scope.name
-                (params) -> params[$scope.name] = $scope.selected.id
+                (params) ->
+                    params[$scope.name] = $scope.selected.id if $scope.selected.id != ngCoreDropdown.anyValue
             )
     ])
     .directive('coreTextarea', [ ->

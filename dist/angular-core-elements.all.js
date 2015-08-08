@@ -895,8 +895,7 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
       templateUrl: '/angular-core-elements/src/dropdown/dropdown.html',
       controller: [
         '$scope', '$element', '$attrs', function($scope, $element, $attrs) {
-          var ANY_VALUE, hasItems, selectDefault, updateItems;
-          ANY_VALUE = '__ANY__';
+          var hasItems, selectDefault, updateItems;
           $scope.isOpen = false;
           if ($scope.changeUrl == null) {
             $scope.changeUrl = ngCoreDropdown.changeUrl;
@@ -923,13 +922,16 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
             return $scope.isOpen = $scope.isOpen ? false : true;
           };
           $scope.select = function(item) {
+            var ref;
+            if (((ref = $scope.selected) != null ? ref.id : void 0) !== item.id) {
+              $scope.selected = item;
+            }
             $scope.isOpen = false;
-            $scope.selected = item;
             $rootScope.$broadcast($scope.selectEvent, $scope.selected);
-            if ($scope.changeUrl === true && $scope.changeUrlOnStart === true && item.id !== ANY_VALUE) {
+            if ($scope.changeUrl === true && $scope.changeUrlOnStart === true && item.id !== ngCoreDropdown.anyValue) {
               $location.search($scope.queryName, $scope.selected.id);
             }
-            if ($scope.changeUrl === true && $scope.changeUrlOnStart === true && item.id === ANY_VALUE) {
+            if ($scope.changeUrl === true && $scope.changeUrlOnStart === true && item.id === ngCoreDropdown.anyValue) {
               return $location.search($scope.queryName, null);
             }
           };
@@ -953,7 +955,7 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
             }
           });
           $scope.$watch('selected', function(newSelected, oldSelected) {
-            if (newSelected !== oldSelected && $scope.selected) {
+            if ((newSelected != null ? newSelected.id : void 0) !== (oldSelected != null ? oldSelected.id : void 0) && $scope.selected) {
               return $scope.select($scope.selected);
             }
           }, true);
@@ -972,7 +974,7 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
               $scope.select($scope.selected);
             } else if (($scope.queryName != null) && (search[$scope.queryName] != null)) {
               $scope.selectById(parseInt(search[$scope.queryName]));
-            } else if (angular.isUndefined($attrs.selected) || (!angular.isUndefined($attrs.selected) && angular.isUndefined($scope.selected))) {
+            } else if (angular.isUndefined($attrs.selected) || (!angular.isUndefined($attrs.selected) && angular.isUndefined($scope.selected)) || ($scope.selected == null)) {
               $scope.select($scope.items[0]);
             }
             if (hasItems()) {
@@ -981,10 +983,10 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
           };
           updateItems = function() {
             var ref;
-            if ($scope.hasAny && ((ref = $scope.items[0]) != null ? ref.id : void 0) !== ANY_VALUE) {
+            if ($scope.hasAny && ((ref = $scope.items[0]) != null ? ref.id : void 0) !== ngCoreDropdown.anyValue) {
               return $timeout(function() {
                 $scope.items.unshift({
-                  id: ANY_VALUE,
+                  id: ngCoreDropdown.anyValue,
                   name: $scope.anyName
                 });
                 return selectDefault();
@@ -1001,6 +1003,7 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
     };
   }
 ]).provider('ngCoreDropdown', function() {
+  this.anyValue = '__ANY__';
   this.changeUrl = false;
   this.changeUrlOnStart = false;
   this.queryName = 'dropdown';
@@ -1011,6 +1014,7 @@ angular.module('ngCoreElementDropdown', []).directive('coreDropdown', [
   this.$get = (function(_this) {
     return function() {
       return {
+        anyValue: _this.anyValue,
         changeUrl: _this.changeUrl,
         changeUrlOnStart: _this.changeUrlOnStart,
         queryName: _this.queryName,
@@ -1288,7 +1292,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
   };
   return this;
 }).directive('coreSelect', [
-  '$timeout', function($timeout) {
+  'ngCoreDropdown', function(ngCoreDropdown) {
     return {
       scope: {
         name: '@',
@@ -1334,7 +1338,9 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
           }
         });
         return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
-          return params[$scope.name] = $scope.selected.id;
+          if ($scope.selected.id !== ngCoreDropdown.anyValue) {
+            return params[$scope.name] = $scope.selected.id;
+          }
         });
       }
     };
