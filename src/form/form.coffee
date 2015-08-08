@@ -10,6 +10,7 @@ angular
             sendEvent: '@'
             receiveEvent: '@'
             errorEvent: '@'
+            preventSend: '@'
         restrict: 'E'
         replace: true
         transclude: true
@@ -22,6 +23,7 @@ angular
             $scope.receiveEvent = ngCoreForm.receiveEvent unless $scope.receiveEvent?
             $scope.errorEvent = ngCoreForm.errorEvent unless $scope.errorEvent?
             $scope.cleanAfterSendEvent = ngCoreForm.cleanAfterSendEvent
+            $scope.preventSend = ngCoreForm.preventSend unless $scope.preventSend?
             $scope.error = null
             listeners = {}
             listeners[$scope.successEvent] = {}
@@ -43,6 +45,9 @@ angular
                 params = {}
                 trigger($scope.sendEvent, params)
                 $scope.$emit($scope.sendEvent, params)
+                if $scope.preventSend
+                    console.log(params)
+                    return
                 $service.getByPath($scope.service)(params, (resp) ->
                     trigger($scope.receiveEvent, resp)
                     $scope.$emit($scope.receiveEvent, resp)
@@ -77,6 +82,7 @@ angular
         @receiveEvent = 'form.receive'
         @errorEvent = 'form.error'
         @cleanAfterSendEvent = 'form.clean'
+        @preventSend = false
         @$get = =>
             cleanAfterSend: @cleanAfterSend
             successEvent: @successEvent
@@ -84,6 +90,7 @@ angular
             receiveEvent: @receiveEvent
             errorEvent: @errorEvent
             cleanAfterSendEvent: @cleanAfterSendEvent
+            preventSend: @preventSend
         return
     )
     .directive('coreInput', [ ->
@@ -338,5 +345,30 @@ angular
                         params[$scope.name] = for i in [0..$scope.items.length-1]
                             $scope.items[i].id
                     else params[$scope.name] = $scope.item.id
+            )
+    ])
+    .directive('coreRadio', [ ->
+        scope:
+            name: '@'
+            label: '@'
+            lblClass: '@'
+            wrpClass: '@'
+            items: '='
+            selected: '=?'
+            inline: '@'
+        require: '^coreForm'
+        restrict: 'E'
+        replace: true
+        templateUrl: ($element, $attrs) ->
+            if $attrs.wrpClass?
+                '/angular-core-elements/src/form/wrapped-radio.html'
+            else '/angular-core-elements/src/form/radio.html'
+        link: ($scope, $element, $attrs, $ctrl) ->
+            throw new Error('name should be defined') unless $scope.name?
+
+            $ctrl.addListener(
+                $ctrl.getSendEvent()
+                $scope.name
+                (params) -> params[$scope.name] = $scope.selected if $scope.selected
             )
     ])

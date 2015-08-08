@@ -1503,6 +1503,40 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       }
     };
   }
+]).directive('coreRadio', [
+  function() {
+    return {
+      scope: {
+        name: '@',
+        label: '@',
+        lblClass: '@',
+        wrpClass: '@',
+        items: '=',
+        selected: '=?',
+        inline: '@'
+      },
+      require: '^coreForm',
+      restrict: 'E',
+      replace: true,
+      templateUrl: function($element, $attrs) {
+        if ($attrs.wrpClass != null) {
+          return '/angular-core-elements/src/form/wrapped-radio.html';
+        } else {
+          return '/angular-core-elements/src/form/radio.html';
+        }
+      },
+      link: function($scope, $element, $attrs, $ctrl) {
+        if ($scope.name == null) {
+          throw new Error('name should be defined');
+        }
+        return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
+          if ($scope.selected) {
+            return params[$scope.name] = $scope.selected;
+          }
+        });
+      }
+    };
+  }
 ]);
 
 angular.module('ngCoreElementModal', []).directive('coreModal', [

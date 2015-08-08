@@ -1503,6 +1503,40 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
       }
     };
   }
+]).directive('coreRadio', [
+  function() {
+    return {
+      scope: {
+        name: '@',
+        label: '@',
+        lblClass: '@',
+        wrpClass: '@',
+        items: '=',
+        selected: '=?',
+        inline: '@'
+      },
+      require: '^coreForm',
+      restrict: 'E',
+      replace: true,
+      templateUrl: function($element, $attrs) {
+        if ($attrs.wrpClass != null) {
+          return '/angular-core-elements/src/form/wrapped-radio.html';
+        } else {
+          return '/angular-core-elements/src/form/radio.html';
+        }
+      },
+      link: function($scope, $element, $attrs, $ctrl) {
+        if ($scope.name == null) {
+          throw new Error('name should be defined');
+        }
+        return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
+          if ($scope.selected) {
+            return params[$scope.name] = $scope.selected;
+          }
+        });
+      }
+    };
+  }
 ]);
 
 angular.module('ngCoreElementModal', []).directive('coreModal', [
@@ -2239,6 +2273,18 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
   );
 
 
+  $templateCache.put('/angular-core-elements/src/form/radio.html',
+    "<div class=\"form-group\">\n" +
+    "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
+    "    <label ng-repeat=\"item in items\">\n" +
+    "        <input type=\"radio\"\n" +
+    "               name=\"{{name}}\"\n" +
+    "               value=\"{{item.id}}\"/>{{item.name}}\n" +
+    "    </label>\n" +
+    "</div>"
+  );
+
+
   $templateCache.put('/angular-core-elements/src/form/select.html',
     "<div class=\"form-group\">\n" +
     "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
@@ -2298,6 +2344,18 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "               value=\"{{value}}\"\n" +
     "               class=\"form-control\"\n" +
     "               placeholder=\"{{placeholder}}\"/>\n" +
+    "    </div>\n" +
+    "</div>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/form/wrapped-radio.html',
+    "<div class=\"form-group\">\n" +
+    "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
+    "    <div class=\"{{wrpClass}}\">\n" +
+    "        <label ng-class=\"{'radio-inline': inline}\" ng-repeat=\"item in items\">\n" +
+    "            <input type=\"radio\" name=\"{{name}}\" value=\"{{item.id}}\">{{item.name}}\n" +
+    "        </label>\n" +
     "    </div>\n" +
     "</div>"
   );
