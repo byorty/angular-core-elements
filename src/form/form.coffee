@@ -46,7 +46,8 @@ angular
                 trigger($scope.sendEvent, params)
                 $scope.$emit($scope.sendEvent, params)
                 if $scope.preventSend
-                    console.log(params)
+                    trigger($scope.receiveEvent, null)
+                    $scope.$emit($scope.receiveEvent, null)
                     return
                 $service.getByPath($scope.service)(params, (resp) ->
                     trigger($scope.receiveEvent, resp)
@@ -366,9 +367,12 @@ angular
         link: ($scope, $element, $attrs, $ctrl) ->
             throw new Error('name should be defined') unless $scope.name?
 
+            $scope.onChange = (id) -> $scope.selected = id
+
             $ctrl.addListener(
                 $ctrl.getSendEvent()
                 $scope.name
-                (params) -> params[$scope.name] = $scope.selected if $scope.selected
+                (params) ->
+                    params[$scope.name] = $scope.selected if $scope.selected?
             )
     ])

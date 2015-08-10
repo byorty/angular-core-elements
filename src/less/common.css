@@ -4601,6 +4601,9 @@ form .form-error-wrapper {
   display: none;
   margin-bottom: 10px;
 }
+form.form-horizontal .radio-inline {
+  padding-top: 0;
+}
 .dropdown-wrapper {
   display: -moz-inline-stack !important;
   display: inline-block !important;

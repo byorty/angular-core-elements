@@ -215,7 +215,9 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "    <label ng-repeat=\"item in items\">\n" +
     "        <input type=\"radio\"\n" +
     "               name=\"{{name}}\"\n" +
-    "               value=\"{{item.id}}\"/>{{item.name}}\n" +
+    "               value=\"{{item.id}}\"\n" +
+    "               ng-model=\"selected\"\n" +
+    "               ng-change=\"onChange(item.id)\"/>{{item.name}}\n" +
     "    </label>\n" +
     "</div>"
   );
@@ -290,7 +292,11 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
     "    <div class=\"{{wrpClass}}\">\n" +
     "        <label ng-class=\"{'radio-inline': inline}\" ng-repeat=\"item in items\">\n" +
-    "            <input type=\"radio\" name=\"{{name}}\" value=\"{{item.id}}\">{{item.name}}\n" +
+    "            <input type=\"radio\"\n" +
+    "                   name=\"{{name}}\"\n" +
+    "                   value=\"{{item.id}}\"\n" +
+    "                   ng-model=\"selected\"\n" +
+    "                   ng-change=\"onChange(item.id)\">{{item.name}}\n" +
     "        </label>\n" +
     "    </div>\n" +
     "</div>"

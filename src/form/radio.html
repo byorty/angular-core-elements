@@ -3,6 +3,8 @@
     <label ng-repeat="item in items">
         <input type="radio"
                name="{{name}}"
-               value="{{item.id}}"/>{{item.name}}
+               value="{{item.id}}"
+               ng-model="selected"
+               ng-change="onChange(item.id)"/>{{item.name}}
     </label>
 </div>

@@ -1038,7 +1038,8 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         beforeSendEvent: '@',
         sendEvent: '@',
         receiveEvent: '@',
-        errorEvent: '@'
+        errorEvent: '@',
+        preventSend: '@'
       },
       restrict: 'E',
       replace: true,
@@ -1066,6 +1067,9 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
             $scope.errorEvent = ngCoreForm.errorEvent;
           }
           $scope.cleanAfterSendEvent = ngCoreForm.cleanAfterSendEvent;
+          if ($scope.preventSend == null) {
+            $scope.preventSend = ngCoreForm.preventSend;
+          }
           $scope.error = null;
           listeners = {};
           listeners[$scope.successEvent] = {};
@@ -1108,6 +1112,11 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
             params = {};
             trigger($scope.sendEvent, params);
             $scope.$emit($scope.sendEvent, params);
+            if ($scope.preventSend) {
+              trigger($scope.receiveEvent, null);
+              $scope.$emit($scope.receiveEvent, null);
+              return;
+            }
             return $service.getByPath($scope.service)(params, function(resp) {
               var errors, message, name;
               trigger($scope.receiveEvent, resp);
@@ -1160,6 +1169,7 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
   this.receiveEvent = 'form.receive';
   this.errorEvent = 'form.error';
   this.cleanAfterSendEvent = 'form.clean';
+  this.preventSend = false;
   this.$get = (function(_this) {
     return function() {
       return {
@@ -1168,7 +1178,8 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         sendEvent: _this.sendEvent,
         receiveEvent: _this.receiveEvent,
         errorEvent: _this.errorEvent,
-        cleanAfterSendEvent: _this.cleanAfterSendEvent
+        cleanAfterSendEvent: _this.cleanAfterSendEvent,
+        preventSend: _this.preventSend
       };
     };
   })(this);
@@ -1529,8 +1540,11 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         if ($scope.name == null) {
           throw new Error('name should be defined');
         }
+        $scope.onChange = function(id) {
+          return $scope.selected = id;
+        };
         return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
-          if ($scope.selected) {
+          if ($scope.selected != null) {
             return params[$scope.name] = $scope.selected;
           }
         });
@@ -2279,7 +2293,9 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "    <label ng-repeat=\"item in items\">\n" +
     "        <input type=\"radio\"\n" +
     "               name=\"{{name}}\"\n" +
-    "               value=\"{{item.id}}\"/>{{item.name}}\n" +
+    "               value=\"{{item.id}}\"\n" +
+    "               ng-model=\"selected\"\n" +
+    "               ng-change=\"onChange(item.id)\"/>{{item.name}}\n" +
     "    </label>\n" +
     "</div>"
   );
@@ -2354,7 +2370,11 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
     "    <div class=\"{{wrpClass}}\">\n" +
     "        <label ng-class=\"{'radio-inline': inline}\" ng-repeat=\"item in items\">\n" +
-    "            <input type=\"radio\" name=\"{{name}}\" value=\"{{item.id}}\">{{item.name}}\n" +
+    "            <input type=\"radio\"\n" +
+    "                   name=\"{{name}}\"\n" +
+    "                   value=\"{{item.id}}\"\n" +
+    "                   ng-model=\"selected\"\n" +
+    "                   ng-change=\"onChange(item.id)\">{{item.name}}\n" +
     "        </label>\n" +
     "    </div>\n" +
     "</div>"
