@@ -2295,7 +2295,7 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "               name=\"{{name}}\"\n" +
     "               value=\"{{item.id}}\"\n" +
     "               ng-model=\"selected\"\n" +
-    "               ng-change=\"onChange(item.id)\"/>{{item.name}}\n" +
+    "               ng-click=\"onChange(item.id)\"/>{{item.name}}\n" +
     "    </label>\n" +
     "</div>"
   );
@@ -2374,7 +2374,7 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "                   name=\"{{name}}\"\n" +
     "                   value=\"{{item.id}}\"\n" +
     "                   ng-model=\"selected\"\n" +
-    "                   ng-change=\"onChange(item.id)\">{{item.name}}\n" +
+    "                   ng-click=\"onChange(item.id)\">{{item.name}}\n" +
     "        </label>\n" +
     "    </div>\n" +
     "</div>"
