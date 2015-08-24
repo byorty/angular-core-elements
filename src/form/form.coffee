@@ -376,3 +376,30 @@ angular
                     params[$scope.name] = $scope.selected if $scope.selected?
             )
     ])
+    .directive('coreDatepickerInput', [ ->
+        scope:
+            name: '@'
+            label: '@'
+            lblClass: '@'
+            wrpClass: '@'
+            value: '=?'
+
+
+
+        require: '^coreForm'
+        restrict: 'E'
+        replace: true
+        templateUrl: ($element, $attrs) ->
+            if $attrs.wrpClass?
+                '/angular-core-elements/src/form/wrapped-datepicker.html'
+            else '/angular-core-elements/src/form/datepicker.html'
+        link: ($scope, $element, $attrs, $ctrl) ->
+            throw new Error('name should be defined') unless $scope.name?
+
+            $ctrl.addListener(
+                $ctrl.getSendEvent()
+                $scope.name
+                (params) ->
+                    params[$scope.name] = $scope.value if $scope.value?
+            )
+    ])
