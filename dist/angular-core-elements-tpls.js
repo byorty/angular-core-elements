@@ -85,6 +85,7 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "        <input type=\"text\"\n" +
     "               class=\"form-control\"\n" +
     "               ng-click=\"event.preventDefault();open()\"\n" +
+    "               name=\"{{name}}\"\n" +
     "               value=\"{{value}}\"/>\n" +
     "        <div class=\"datepicker-popover\" ng-show=\"isOpen\">\n" +
     "            <div class=\"datepicker-btns\">\n" +
@@ -184,6 +185,15 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
   );
 
 
+  $templateCache.put('/angular-core-elements/src/form/datepicker.html',
+    "<div class=\"form-group\">\n" +
+    "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
+    "    <core-datepicker name=\"{{name}}\"\n" +
+    "                     current=\"value\"></core-datepicker>\n" +
+    "</div>"
+  );
+
+
   $templateCache.put('/angular-core-elements/src/form/form.html',
     "<form>\n" +
     "    <div ng-transclude></div>\n" +
@@ -268,6 +278,17 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "               name=\"{{name}}\"\n" +
     "               value=\"{{value}}\"\n" +
     "               ng-model=\"checked\"/>\n" +
+    "    </div>\n" +
+    "</div>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/form/wrapped-datepicker.html',
+    "<div class=\"form-group\">\n" +
+    "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
+    "    <div class=\"{{wrpClass}}\">\n" +
+    "        <core-datepicker name=\"{{name}}\"\n" +
+    "                         current=\"value\"></core-datepicker>\n" +
     "    </div>\n" +
     "</div>"
   );

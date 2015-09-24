@@ -1,9 +1,5 @@
 <div class="form-group">
     <label ng-if="label" class="{{lblClass}}">{{label}}</label>
-    <core-datepicker label="по:"></core-datepicker>
-    <input type="{{type}}"
-           name="{{name}}"
-           value="{{value}}"
-           class="form-control"
-           placeholder="{{placeholder}}"/>
+    <core-datepicker name="{{name}}"
+                     current="value"></core-datepicker>
 </div>

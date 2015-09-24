@@ -383,9 +383,7 @@ angular
             lblClass: '@'
             wrpClass: '@'
             value: '=?'
-
-
-
+            format: '@'
         require: '^coreForm'
         restrict: 'E'
         replace: true
@@ -395,11 +393,12 @@ angular
             else '/angular-core-elements/src/form/datepicker.html'
         link: ($scope, $element, $attrs, $ctrl) ->
             throw new Error('name should be defined') unless $scope.name?
+            $scope.format = 'Y-m-d H:i:s' unless $scope.format
 
             $ctrl.addListener(
                 $ctrl.getSendEvent()
                 $scope.name
                 (params) ->
-                    params[$scope.name] = $scope.value if $scope.value?
+                    params[$scope.name] = $scope.value.format($scope.format) if $scope.value?
             )
     ])

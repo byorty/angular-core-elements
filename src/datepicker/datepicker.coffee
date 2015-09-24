@@ -198,6 +198,7 @@ angular
             format: '@'
             label: '@'
             lblClass: '@'
+            name: '@'
         restrict: 'E'
         replace: true
         templateUrl: '/angular-core-elements/src/datepicker/datepicker.html'

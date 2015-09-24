@@ -763,7 +763,8 @@ angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
         iconRight: '@',
         format: '@',
         label: '@',
-        lblClass: '@'
+        lblClass: '@',
+        name: '@'
       },
       restrict: 'E',
       replace: true,
@@ -806,6 +807,7 @@ angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
           if ($scope.format == null) {
             $scope.format = ngCoreDatepicker.format;
           }
+          console.log($scope);
           if ($scope.current != null) {
             $scope.current = typeof $scope.current === 'string' ? new Date($scope.current) : void 0;
             $scope.value = $scope.current.format($scope.format);
@@ -1546,6 +1548,38 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
           if ($scope.selected != null) {
             return params[$scope.name] = $scope.selected;
+          }
+        });
+      }
+    };
+  }
+]).directive('coreDatepickerInput', [
+  function() {
+    return {
+      scope: {
+        name: '@',
+        label: '@',
+        lblClass: '@',
+        wrpClass: '@',
+        value: '=?'
+      },
+      require: '^coreForm',
+      restrict: 'E',
+      replace: true,
+      templateUrl: function($element, $attrs) {
+        if ($attrs.wrpClass != null) {
+          return '/angular-core-elements/src/form/wrapped-datepicker.html';
+        } else {
+          return '/angular-core-elements/src/form/datepicker.html';
+        }
+      },
+      link: function($scope, $element, $attrs, $ctrl) {
+        if ($scope.name == null) {
+          throw new Error('name should be defined');
+        }
+        return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
+          if ($scope.value != null) {
+            return params[$scope.name] = $scope.value;
           }
         });
       }
