@@ -807,7 +807,6 @@ angular.module('ngCoreElementDatepicker', []).directive('coreDatepicker', [
           if ($scope.format == null) {
             $scope.format = ngCoreDatepicker.format;
           }
-          console.log($scope);
           if ($scope.current != null) {
             $scope.current = typeof $scope.current === 'string' ? new Date($scope.current) : void 0;
             $scope.value = $scope.current.format($scope.format);
@@ -1561,7 +1560,8 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         label: '@',
         lblClass: '@',
         wrpClass: '@',
-        value: '=?'
+        value: '=?',
+        format: '@'
       },
       require: '^coreForm',
       restrict: 'E',
@@ -1577,9 +1577,12 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
         if ($scope.name == null) {
           throw new Error('name should be defined');
         }
+        if (!$scope.format) {
+          $scope.format = 'Y-m-d H:i:s';
+        }
         return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
           if ($scope.value != null) {
-            return params[$scope.name] = $scope.value;
+            return params[$scope.name] = $scope.value.format($scope.format);
           }
         });
       }
