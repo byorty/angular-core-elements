@@ -1,0 +1,10 @@
+<div class="form-group">
+    <label ng-if="label" class="{{lblClass}}">{{label}}</label>
+    <div class="{{wrpClass}}">
+        <button class="btn btn-default"
+                ng-file-select="upload($files)">Загрузить</button>
+        <input type="hidden"
+               name="{{name}}"
+               value="{{file.id}}"/>
+    </div>
+</div>

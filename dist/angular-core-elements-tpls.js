@@ -194,6 +194,18 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
   );
 
 
+  $templateCache.put('/angular-core-elements/src/form/file.html',
+    "<div class=\"form-group\">\n" +
+    "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
+    "    <button class=\"btn btn-default\"\n" +
+    "            ng-file-select=\"upload($files)\">Загрузить</button>\n" +
+    "    <input type=\"hidden\"\n" +
+    "           name=\"{{name}}\"\n" +
+    "           value=\"{{file.id}}\"/>\n" +
+    "</div>"
+  );
+
+
   $templateCache.put('/angular-core-elements/src/form/form.html',
     "<form>\n" +
     "    <div ng-transclude></div>\n" +
@@ -289,6 +301,20 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "    <div class=\"{{wrpClass}}\">\n" +
     "        <core-datepicker name=\"{{name}}\"\n" +
     "                         current=\"value\"></core-datepicker>\n" +
+    "    </div>\n" +
+    "</div>"
+  );
+
+
+  $templateCache.put('/angular-core-elements/src/form/wrapped-file.html',
+    "<div class=\"form-group\">\n" +
+    "    <label ng-if=\"label\" class=\"{{lblClass}}\">{{label}}</label>\n" +
+    "    <div class=\"{{wrpClass}}\">\n" +
+    "        <button class=\"btn btn-default\"\n" +
+    "                ng-file-select=\"upload($files)\">Загрузить</button>\n" +
+    "        <input type=\"hidden\"\n" +
+    "               name=\"{{name}}\"\n" +
+    "               value=\"{{file.id}}\"/>\n" +
     "    </div>\n" +
     "</div>"
   );

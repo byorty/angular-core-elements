@@ -1578,11 +1578,60 @@ angular.module('ngCoreElementForm', []).directive('coreForm', [
           throw new Error('name should be defined');
         }
         if (!$scope.format) {
-          $scope.format = 'Y-m-d H:i:s';
+          $scope.format = 'Y-m-d';
         }
         return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
           if ($scope.value != null) {
             return params[$scope.name] = $scope.value.format($scope.format);
+          }
+        });
+      }
+    };
+  }
+]).directive('coreFile', [
+  '$upload', function($upload) {
+    return {
+      scope: {
+        name: '@',
+        label: '@',
+        lblClass: '@',
+        wrpClass: '@',
+        url: '@'
+      },
+      require: '^coreForm',
+      restrict: 'E',
+      replace: true,
+      templateUrl: function($element, $attrs) {
+        if ($attrs.wrpClass != null) {
+          return '/angular-core-elements/src/form/wrapped-file.html';
+        } else {
+          return '/angular-core-elements/src/form/file.html';
+        }
+      },
+      link: function($scope, $element, $attrs, $ctrl) {
+        if ($scope.name == null) {
+          throw new Error('name should be defined');
+        }
+        $scope.file = null;
+        $scope.upload = function($files) {
+          var i, k, ref, results;
+          results = [];
+          for (i = k = 0, ref = $files.length - 1; 0 <= ref ? k <= ref : k >= ref; i = 0 <= ref ? ++k : --k) {
+            results.push($upload.upload({
+              url: $scope.url,
+              file: $files[i]
+            }).success(function(resp) {
+              if (resp.success) {
+                return $scope.file = resp.item;
+              }
+            }));
+          }
+          return results;
+        };
+        return $ctrl.addListener($ctrl.getSendEvent(), $scope.name, function(params) {
+          var ref;
+          if (((ref = $scope.file) != null ? ref.id : void 0) != null) {
+            return params[$scope.name] = $scope.file.id;
           }
         });
       }

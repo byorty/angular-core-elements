@@ -393,12 +393,45 @@ angular
             else '/angular-core-elements/src/form/datepicker.html'
         link: ($scope, $element, $attrs, $ctrl) ->
             throw new Error('name should be defined') unless $scope.name?
-            $scope.format = 'Y-m-d H:i:s' unless $scope.format
+            $scope.format = 'Y-m-d' unless $scope.format
 
             $ctrl.addListener(
                 $ctrl.getSendEvent()
                 $scope.name
                 (params) ->
                     params[$scope.name] = $scope.value.format($scope.format) if $scope.value?
+            )
+    ])
+    .directive('coreFile', ['$upload', ($upload) ->
+        scope:
+            name: '@'
+            label: '@'
+            lblClass: '@'
+            wrpClass: '@'
+            url: '@'
+        require: '^coreForm'
+        restrict: 'E'
+        replace: true
+        templateUrl: ($element, $attrs) ->
+            if $attrs.wrpClass?
+                '/angular-core-elements/src/form/wrapped-file.html'
+            else '/angular-core-elements/src/form/file.html'
+        link: ($scope, $element, $attrs, $ctrl) ->
+            throw new Error('name should be defined') unless $scope.name?
+            $scope.file = null
+
+            $scope.upload = ($files) ->
+                for i in [0..$files.length-1]
+                    $upload.upload(
+                        url: $scope.url,
+                        file: $files[i]
+                    ).success((resp) ->
+                        if resp.success
+                            $scope.file = resp.item
+                    )
+            $ctrl.addListener(
+                $ctrl.getSendEvent()
+                $scope.name
+                (params) -> params[$scope.name] = $scope.file.id if $scope.file?.id?
             )
     ])
