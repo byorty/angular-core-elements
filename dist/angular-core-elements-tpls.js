@@ -502,7 +502,10 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "    <div class=\"form-group\" ng-repeat=\"row in rows\">\n" +
     "        <label class=\"{{row.lblClass}} control-label\">{{row.name}}</label>\n" +
     "        <div class=\"{{row.wrpClass}}\">\n" +
-    "            <p class=\"form-control-static\" core-compile-row></p>\n" +
+    "            <p class=\"form-control-static\"\n" +
+    "               core-cell\n" +
+    "               item=\"item\"\n" +
+    "               content=\"row.content\"></p>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>"
@@ -521,9 +524,11 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "        <tr ng-repeat=\"(i, item) in items\" class=\"table-row {{i}}\">\n" +
     "            <td class=\"table-cell {{j}} {{cell.class}}\"\n" +
     "                ng-repeat=\"(j, cell) in cells\"\n" +
-    "                core-cell></td>\n" +
+    "                core-cell\n" +
+    "                item=\"item\"\n" +
+    "                content=\"cell.content\"></td>\n" +
     "        </tr>\n" +
-    "        <tr ng-show=\"!items.length\">\n" +
+    "        <tr ng-if=\"!items || (items && items.length == 0)\">\n" +
     "            <td class=\"items-not-found\" colspan=\"{{cells.length}}\">{{itemsNotFound}}</td>\n" +
     "        </tr>\n" +
     "    </tbody>\n" +

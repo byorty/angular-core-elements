@@ -9,9 +9,11 @@
         <tr ng-repeat="(i, item) in items" class="table-row {{i}}">
             <td class="table-cell {{j}} {{cell.class}}"
                 ng-repeat="(j, cell) in cells"
-                core-cell></td>
+                core-cell
+                item="item"
+                content="cell.content"></td>
         </tr>
-        <tr ng-show="!items.length">
+        <tr ng-if="!items || (items && items.length == 0)">
             <td class="items-not-found" colspan="{{cells.length}}">{{itemsNotFound}}</td>
         </tr>
     </tbody>

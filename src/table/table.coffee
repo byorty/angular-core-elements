@@ -28,7 +28,6 @@ angular
             $scope.changeUrl = false unless $scope.changeUrl?
             $scope.changeUrlOnStart = false unless $scope.changeUrl?
             $scope.itemsNotFound = 'Нет данных для отображения' unless $scope.itemsNotFound?
-            parentScope = $scope
 
             if $scope.changeUrl
                 $scope.$on('pagination', (event, pagination) ->
@@ -61,10 +60,6 @@ angular
 
             @add = (cell) -> $scope.cells.push(cell)
             @getCollectionName = -> $attrs.items
-            @getParentScope = -> parentScope
-
-            while !parentScope.hasOwnProperty(@getCollectionName()) or (parentScope.hasOwnProperty(@getCollectionName()) and $scope.$id is parentScope.$id)
-                parentScope = parentScope.$parent
 
             search = $location.search()
             if search[$scope.pageQueryName]?
@@ -72,14 +67,6 @@ angular
 
             $scope.selectPage($scope.currentPage) if $scope.itemsCount and $scope.itemsPerPage
             $scope.changeUrlOnStart = true
-
-            if parentScope?
-              parentScope.$watch(
-                  @getCollectionName()
-                  (newRows, oldRows, scope) =>
-                      $scope.items = scope[@getCollectionName()] if scope[@getCollectionName()]? and $scope.items isnt scope[@getCollectionName()]
-                  true
-              )
         ]
     ])
     .directive('coreCol', [ ->
@@ -94,12 +81,15 @@ angular
                 $scope.content = content
                 $ctrl.add($scope)
     ])
-    .directive('coreCell', ['compileCell', (compileCell) ->
+    .directive('coreCell', ['$compile', ($compile) ->
+        scope:
+            item: '=?'
+            content: '=?'
         restrict: 'A'
-        require: '^coreTable'
         replace: true
         link: ($scope, $element, $attrs, $ctrl) ->
-            compileCell($element, $scope.cell.content, "#{$ctrl.getCollectionName()}[#{$scope.$parent.i}]", $ctrl.getParentScope())
+            $element.append($scope.content);
+            $compile($element.contents())($scope);
     ])
     .directive('coreDetails', [ ->
         scope:
@@ -110,14 +100,8 @@ angular
         templateUrl: '/angular-core-elements/src/table/details.html'
         controller: ['$scope', '$element', '$attrs', ($scope, $element, $attrs) ->
             $scope.rows = []
-            parentScope = $scope
 
             @add = (row) -> $scope.rows.push(row)
-            @getCollectionName = -> $attrs.item
-            @getParentScope = -> parentScope
-
-            while !parentScope.hasOwnProperty(@getCollectionName()) or (parentScope.hasOwnProperty(@getCollectionName()) and $scope.$id is parentScope.$id)
-                parentScope = parentScope.$parent
         ]
     ])
     .directive('coreRow', [ ->
@@ -135,18 +119,3 @@ angular
                 $scope.content = content
                 $ctrl.add($scope)
     ])
-    .directive('coreCompileRow', ['compileCell', (compileCell) ->
-        restrict: 'A'
-        require: '^coreDetails'
-        link: ($scope, $element, $attrs, $ctrl) ->
-            compileCell($element, $scope.row.content, $ctrl.getCollectionName(), $ctrl.getParentScope())
-    ])
-    .factory(
-        'compileCell'
-        ['$compile', ($compile) ->
-            (element, content, replaced, parentScope) ->
-                reg = new RegExp('item(?!s)', 'g')
-                element.append(content.replace(reg, replaced))
-                $compile(element.contents())(parentScope)
-        ]
-    )

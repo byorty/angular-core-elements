@@ -1801,7 +1801,7 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
       templateUrl: '/angular-core-elements/src/table/table.html',
       controller: [
         '$scope', '$element', '$attrs', function($scope, $element, $attrs) {
-          var parentScope, search;
+          var search;
           $scope.cells = [];
           $scope.cellElements = [];
           if ($scope.pageQueryName == null) {
@@ -1831,7 +1831,6 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
           if ($scope.itemsNotFound == null) {
             $scope.itemsNotFound = 'Нет данных для отображения';
           }
-          parentScope = $scope;
           if ($scope.changeUrl) {
             $scope.$on('pagination', function(event, pagination) {
               $scope.currentPage = pagination.page;
@@ -1873,12 +1872,6 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
           this.getCollectionName = function() {
             return $attrs.items;
           };
-          this.getParentScope = function() {
-            return parentScope;
-          };
-          while (!parentScope.hasOwnProperty(this.getCollectionName()) || (parentScope.hasOwnProperty(this.getCollectionName()) && $scope.$id === parentScope.$id)) {
-            parentScope = parentScope.$parent;
-          }
           search = $location.search();
           if (search[$scope.pageQueryName] != null) {
             $scope.currentPage = parseInt(search[$scope.pageQueryName]);
@@ -1886,16 +1879,7 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
           if ($scope.itemsCount && $scope.itemsPerPage) {
             $scope.selectPage($scope.currentPage);
           }
-          $scope.changeUrlOnStart = true;
-          if (parentScope != null) {
-            return parentScope.$watch(this.getCollectionName(), (function(_this) {
-              return function(newRows, oldRows, scope) {
-                if ((scope[_this.getCollectionName()] != null) && $scope.items !== scope[_this.getCollectionName()]) {
-                  return $scope.items = scope[_this.getCollectionName()];
-                }
-              };
-            })(this), true);
-          }
+          return $scope.changeUrlOnStart = true;
         }
       ]
     };
@@ -1920,13 +1904,17 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
     };
   }
 ]).directive('coreCell', [
-  'compileCell', function(compileCell) {
+  '$compile', function($compile) {
     return {
+      scope: {
+        item: '=?',
+        content: '=?'
+      },
       restrict: 'A',
-      require: '^coreTable',
       replace: true,
       link: function($scope, $element, $attrs, $ctrl) {
-        return compileCell($element, $scope.cell.content, ($ctrl.getCollectionName()) + "[" + $scope.$parent.i + "]", $ctrl.getParentScope());
+        $element.append($scope.content);
+        return $compile($element.contents())($scope);
       }
     };
   }
@@ -1942,23 +1930,10 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
       templateUrl: '/angular-core-elements/src/table/details.html',
       controller: [
         '$scope', '$element', '$attrs', function($scope, $element, $attrs) {
-          var parentScope, results;
           $scope.rows = [];
-          parentScope = $scope;
-          this.add = function(row) {
+          return this.add = function(row) {
             return $scope.rows.push(row);
           };
-          this.getCollectionName = function() {
-            return $attrs.item;
-          };
-          this.getParentScope = function() {
-            return parentScope;
-          };
-          results = [];
-          while (!parentScope.hasOwnProperty(this.getCollectionName()) || (parentScope.hasOwnProperty(this.getCollectionName()) && $scope.$id === parentScope.$id)) {
-            results.push(parentScope = parentScope.$parent);
-          }
-          return results;
         }
       ]
     };
@@ -1985,25 +1960,6 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
           return $ctrl.add($scope);
         };
       }
-    };
-  }
-]).directive('coreCompileRow', [
-  'compileCell', function(compileCell) {
-    return {
-      restrict: 'A',
-      require: '^coreDetails',
-      link: function($scope, $element, $attrs, $ctrl) {
-        return compileCell($element, $scope.row.content, $ctrl.getCollectionName(), $ctrl.getParentScope());
-      }
-    };
-  }
-]).factory('compileCell', [
-  '$compile', function($compile) {
-    return function(element, content, replaced, parentScope) {
-      var reg;
-      reg = new RegExp('item(?!s)', 'g');
-      element.append(content.replace(reg, replaced));
-      return $compile(element.contents())(parentScope);
     };
   }
 ]);
@@ -2666,7 +2622,10 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "    <div class=\"form-group\" ng-repeat=\"row in rows\">\n" +
     "        <label class=\"{{row.lblClass}} control-label\">{{row.name}}</label>\n" +
     "        <div class=\"{{row.wrpClass}}\">\n" +
-    "            <p class=\"form-control-static\" core-compile-row></p>\n" +
+    "            <p class=\"form-control-static\"\n" +
+    "               core-cell\n" +
+    "               item=\"item\"\n" +
+    "               content=\"row.content\"></p>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "</div>"
@@ -2685,9 +2644,11 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "        <tr ng-repeat=\"(i, item) in items\" class=\"table-row {{i}}\">\n" +
     "            <td class=\"table-cell {{j}} {{cell.class}}\"\n" +
     "                ng-repeat=\"(j, cell) in cells\"\n" +
-    "                core-cell></td>\n" +
+    "                core-cell\n" +
+    "                item=\"item\"\n" +
+    "                content=\"cell.content\"></td>\n" +
     "        </tr>\n" +
-    "        <tr ng-show=\"!items.length\">\n" +
+    "        <tr ng-if=\"!items || (items && items.length == 0)\">\n" +
     "            <td class=\"items-not-found\" colspan=\"{{cells.length}}\">{{itemsNotFound}}</td>\n" +
     "        </tr>\n" +
     "    </tbody>\n" +
