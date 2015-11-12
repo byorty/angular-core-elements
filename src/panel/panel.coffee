@@ -4,6 +4,7 @@ angular
         restrict: 'E'
         replace: true
         transclude: true
+        scope: true
         templateUrl: '/angular-core-elements/src/panel/panel.html'
     ])
     .directive('corePanelHeader', ['$timeout', '$location', '$rootScope', ($timeout, $location, $rootScope)->

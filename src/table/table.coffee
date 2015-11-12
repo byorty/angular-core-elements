@@ -12,6 +12,7 @@ angular
             changeUrlOnStart: '=?'
             itemsNotFound: '@'
             paginationEvent: '@'
+            ctrl: '=?'
         restrict: 'E'
         replace: true
         transclude: true
@@ -28,6 +29,13 @@ angular
             $scope.changeUrl = false unless $scope.changeUrl?
             $scope.changeUrlOnStart = false unless $scope.changeUrl?
             $scope.itemsNotFound = 'Нет данных для отображения' unless $scope.itemsNotFound?
+            if !$scope.ctrl
+                parent = $scope.$parent
+                while !parent.$root
+                    parent = parent.$parent
+                $scope.ctrl = parent
+                console.log($scope.ctrl)
+                console.log($scope)
 
             if $scope.changeUrl
                 $scope.$on('pagination', (event, pagination) ->
@@ -85,9 +93,10 @@ angular
         scope:
             item: '=?'
             content: '=?'
+            ctrl: '=?'
         restrict: 'A'
         replace: true
-        link: ($scope, $element, $attrs, $ctrl) ->
+        link: ($scope, $element) ->
             $element.append($scope.content);
             $compile($element.contents())($scope);
     ])

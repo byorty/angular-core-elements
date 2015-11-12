@@ -11,7 +11,8 @@
                 ng-repeat="(j, cell) in cells"
                 core-cell
                 item="item"
-                content="cell.content"></td>
+                content="cell.content"
+                ctrl="ctrl"></td>
         </tr>
         <tr ng-if="!items || (items && items.length == 0)">
             <td class="items-not-found" colspan="{{cells.length}}">{{itemsNotFound}}</td>
