@@ -526,7 +526,8 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "                ng-repeat=\"(j, cell) in cells\"\n" +
     "                core-cell\n" +
     "                item=\"item\"\n" +
-    "                content=\"cell.content\"></td>\n" +
+    "                content=\"cell.content\"\n" +
+    "                ctrl=\"ctrl\"></td>\n" +
     "        </tr>\n" +
     "        <tr ng-if=\"!items || (items && items.length == 0)\">\n" +
     "            <td class=\"items-not-found\" colspan=\"{{cells.length}}\">{{itemsNotFound}}</td>\n" +

@@ -1711,6 +1711,7 @@ angular.module('ngCoreElementPanel', []).directive('corePanel', [
       restrict: 'E',
       replace: true,
       transclude: true,
+      scope: false,
       templateUrl: '/angular-core-elements/src/panel/panel.html'
     };
   }
@@ -1793,7 +1794,8 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
         changeUrl: '=?',
         changeUrlOnStart: '=?',
         itemsNotFound: '@',
-        paginationEvent: '@'
+        paginationEvent: '@',
+        ctrl: '=?'
       },
       restrict: 'E',
       replace: true,
@@ -1801,7 +1803,7 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
       templateUrl: '/angular-core-elements/src/table/table.html',
       controller: [
         '$scope', '$element', '$attrs', function($scope, $element, $attrs) {
-          var search;
+          var parent, search;
           $scope.cells = [];
           $scope.cellElements = [];
           if ($scope.pageQueryName == null) {
@@ -1830,6 +1832,13 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
           }
           if ($scope.itemsNotFound == null) {
             $scope.itemsNotFound = 'Нет данных для отображения';
+          }
+          if (!$scope.ctrl) {
+            parent = $scope.$parent;
+            while (parent.$parent.$id !== 1) {
+              parent = parent.$parent;
+            }
+            $scope.ctrl = parent;
           }
           if ($scope.changeUrl) {
             $scope.$on('pagination', function(event, pagination) {
@@ -1908,11 +1917,13 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
     return {
       scope: {
         item: '=?',
-        content: '=?'
+        content: '=?',
+        ctrl: '=?'
       },
       restrict: 'A',
       replace: true,
-      link: function($scope, $element, $attrs, $ctrl) {
+      link: function($scope, $element) {
+        console.log($scope);
         $element.append($scope.content);
         return $compile($element.contents())($scope);
       }
@@ -2646,7 +2657,8 @@ angular.module('ngCoreElements').run(['$templateCache', function($templateCache)
     "                ng-repeat=\"(j, cell) in cells\"\n" +
     "                core-cell\n" +
     "                item=\"item\"\n" +
-    "                content=\"cell.content\"></td>\n" +
+    "                content=\"cell.content\"\n" +
+    "                ctrl=\"ctrl\"></td>\n" +
     "        </tr>\n" +
     "        <tr ng-if=\"!items || (items && items.length == 0)\">\n" +
     "            <td class=\"items-not-found\" colspan=\"{{cells.length}}\">{{itemsNotFound}}</td>\n" +

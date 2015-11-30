@@ -31,11 +31,9 @@ angular
             $scope.itemsNotFound = 'Нет данных для отображения' unless $scope.itemsNotFound?
             if !$scope.ctrl
                 parent = $scope.$parent
-                while !parent.$root
+                while parent.$parent.$id != 1
                     parent = parent.$parent
                 $scope.ctrl = parent
-                console.log($scope.ctrl)
-                console.log($scope)
 
             if $scope.changeUrl
                 $scope.$on('pagination', (event, pagination) ->
