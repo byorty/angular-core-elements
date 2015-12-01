@@ -1923,7 +1923,6 @@ angular.module('ngCoreElementTable', []).directive('coreTable', [
       restrict: 'A',
       replace: true,
       link: function($scope, $element) {
-        console.log($scope);
         $element.append($scope.content);
         return $compile($element.contents())($scope);
       }
